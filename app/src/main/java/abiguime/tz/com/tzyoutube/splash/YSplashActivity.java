@@ -1,10 +1,12 @@
-package abiguime.tz.com.tzyoutube;
+package abiguime.tz.com.tzyoutube.splash;
 
 import android.content.Intent;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.widget.TextView;
+
+import abiguime.tz.com.tzyoutube.R;
+import abiguime.tz.com.tzyoutube.main.MainActivity;
 
 public class YSplashActivity extends AppCompatActivity
 implements Runnable{

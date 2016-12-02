@@ -2,6 +2,8 @@ package abiguime.tz.com.tzyoutube._data.source;
 
 import android.support.annotation.Nullable;
 
+import java.util.List;
+
 import abiguime.tz.com.tzyoutube._data.Video;
 
 /**
@@ -12,8 +14,8 @@ import abiguime.tz.com.tzyoutube._data.Video;
 public interface VideoDataSource {
 
     interface GetVideosCallBack {
-        void onVideoLoaded();
-        void onDataNotAvailable();
+        void onVideoLoaded(List<Video> data);
+        void onDataNotAvailable(String message);
     }
 
     /* 主页面获取视频*/

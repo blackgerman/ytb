@@ -15,6 +15,7 @@ import android.widget.TextView;
 
 import abiguime.tz.com.tzyoutube.R;
 import abiguime.tz.com.tzyoutube._data.User;
+import abiguime.tz.com.tzyoutube.main.fragment_home.HomePageFragment;
 
 
 public class UserPageFragment extends Fragment implements UserPageContract.View {
@@ -25,6 +26,13 @@ public class UserPageFragment extends Fragment implements UserPageContract.View 
 
     public UserPageFragment() {
         // Required empty public constructor
+    }
+
+    public static UserPageFragment newInstance() {
+        UserPageFragment fragment = new UserPageFragment();
+        Bundle args = new Bundle();
+        fragment.setArguments(args);
+        return fragment;
     }
 
 

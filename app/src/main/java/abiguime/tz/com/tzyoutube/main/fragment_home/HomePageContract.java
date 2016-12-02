@@ -14,7 +14,7 @@ public class HomePageContract {
 
 
 
-    interface View extends MainFragmentBaseView<Presenter> {
+    public interface View extends MainFragmentBaseView<Presenter> {
 
         /* 显示视频列表 */
         void showVideoList(List<Video> videos/*视频列表*/);

@@ -13,7 +13,7 @@ public class UserPageContract {
 
 
 
-    interface View extends BaseView<Presenter> {
+    public interface View extends BaseView<Presenter> {
 
         /* presenter 把用户信息传给view(fragment)*/
         void showUser(User user);

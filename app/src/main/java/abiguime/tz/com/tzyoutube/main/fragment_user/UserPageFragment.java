@@ -95,10 +95,13 @@ public class UserPageFragment extends Fragment implements UserPageContract.View 
         });
     }
 
+
     @Override
     public void onLoginProgress() {
         // 显示与正在登录有关的进度条
     }
+
+
 
     @Override
     public void onLoginError(final String message) {

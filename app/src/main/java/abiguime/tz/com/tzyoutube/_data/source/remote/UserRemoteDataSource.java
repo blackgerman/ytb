@@ -21,7 +21,7 @@ import okhttp3.Response;
 public class UserRemoteDataSource implements UserDataSource {
 
 
-    private static final String LOGIN_URL = "http://10.0.2.2/ytb/web/app_dev.php";
+    private static final String LOGIN_URL = "http://192.168.1.135/ytb/web/app_dev.php/getvid";
     private final Context ctx;
 
     OkHttpClient client = new OkHttpClient();

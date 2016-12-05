@@ -1,15 +1,13 @@
 package abiguime.tz.com.tzyoutube.main;
 
 import android.net.Uri;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.widget.FrameLayout;
 
 import abiguime.tz.com.tzyoutube.R;
-import abiguime.tz.com.tzyoutube._data.User;
 import abiguime.tz.com.tzyoutube._data.source.remote.UserRemoteDataSource;
+import abiguime.tz.com.tzyoutube.main.fragment_home.HomePageFragment;
 import abiguime.tz.com.tzyoutube.main.fragment_home.HomePagePresenter;
 import abiguime.tz.com.tzyoutube.main.fragment_user.UserPageFragment;
 import abiguime.tz.com.tzyoutube.main.fragment_user.UserPagePresenter;
@@ -27,7 +25,10 @@ public class MainActivity extends AppCompatActivity implements UserPageFragment.
     FrameLayout activity_frame;
 
     //frames
-    UserPageFragment frg;
+    UserPageFragment user_frg;
+    HomePageFragment home_frg;
+//    HotPageFragment hot_frg;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,10 +40,15 @@ public class MainActivity extends AppCompatActivity implements UserPageFragment.
         initViews();
         // 初始化内部的所有fragment 。。。 （ViewPager)
 
+        //
         initPager();
 
-        // 初始化presenter
+
+        //初始化获取数据服务
         initRemote();
+
+
+        // 初始化presenter
         initPresenter();
     }
 
@@ -51,21 +57,21 @@ public class MainActivity extends AppCompatActivity implements UserPageFragment.
     }
 
     private void initPager() {
-       frg = UserPageFragment.newinstance();
+       /*frg = UserPageFragment.newinstance();
         FragmentManager supportFragmentManager = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = supportFragmentManager.beginTransaction();
         fragmentTransaction.add(R.id.activity_frame, frg, UserPageFragment.class.getName());
-        fragmentTransaction.commit();
+        fragmentTransaction.commit();*/
     }
 
     private void initViews() {
-        activity_frame = (FrameLayout) findViewById(R.id.activity_frame);
+//        activity_frame = (FrameLayout) findViewById(R.id.activity_frame);
     }
 
     private void initPresenter() {
 //        homePagePresenter = new HomePagePresenter(getSupportFragmentManager());
-        userPagePresenter = new UserPagePresenter(frg, userremote);
-        frg.setPresenter(userPagePresenter);
+//        userPagePresenter = new UserPagePresenter(frg, userremote);
+//        frg.setPresenter(userPagePresenter);
     }
 
     @Override

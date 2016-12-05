@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingTop="@dimen/item_margin_top"
+    android:paddingRight="@dimen/item_margin"
+    android:paddingLeft="@dimen/item_margin"
+    android:background="@color/app_default_white">
+
+    <ImageView
+        android:id="@+id/imageview_cover"
+        android:layout_marginLeft="@dimen/main_img_margin"
+        android:layout_marginRight="@dimen/main_img_margin"
+        android:src="@drawable/cover_sample"
+        android:layout_width="match_parent"
+        android:scaleType="centerCrop"
+        android:layout_height="200dp" />
+
+    <RelativeLayout
+        android:layout_marginTop="@dimen/item_margin_top"
+        android:layout_marginBottom="@dimen/item_margin_top"
+        android:layout_marginLeft="@dimen/main_img_margin"
+        android:layout_marginRight="@dimen/main_img_margin"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/iv_user"
+            android:layout_centerVertical="true"
+            android:src="@drawable/pp_sample"
+            android:layout_marginRight="@dimen/main_img_margin"
+            android:layout_width="@dimen/home_pp_radius"
+            android:layout_height="@dimen/home_pp_radius" />
+
+        <LinearLayout
+            android:layout_toRightOf="@id/iv_user"
+            android:layout_centerVertical="true"
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/item_margin_top">
+
+            <TextView
+                android:id="@+id/tvtitle"
+                android:textSize="17sp"
+                android:textColor="@color/text_main_black"
+                android:text="Kiira - Gold (Official) "
+                android:maxLines="2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="2dp"/>
+
+            <TextView
+                android:id="@+id/tv_secondary"
+                android:textSize="14sp"
+                android:maxLines="1"
+                android:textColor="@color/text_secondary_gray"
+                android:text="Kiira - Gold (Official) "
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+        </LinearLayout>
+
+    </RelativeLayout>
+
+
+</LinearLayout>

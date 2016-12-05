@@ -1,0 +1,28 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="abiguime.tz.com.tzyoutube.main.fragment_home.HomePageFragment">
+
+  
+    <ProgressBar
+        android:visibility="visible"
+        android:layout_gravity="top|center_horizontal"
+        android:layout_marginTop="10dp"
+        android:id="@+id/frg_progressbar_circular"
+        android:layout_width="@dimen/progressbar_fragment"
+        android:layout_height="@dimen/progressbar_fragment" />
+
+
+    <android.support.v4.widget.SwipeRefreshLayout
+        android:id="@+id/swipetorefresh"
+        android:visibility="gone"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/recyclerview"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+    </android.support.v4.widget.SwipeRefreshLayout>
+
+</FrameLayout>

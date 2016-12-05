@@ -6,6 +6,6 @@ package abiguime.tz.com.tzyoutube._data.constants;
 public class API {
 
 
-    private static final String IPADRESS = "http://192.168.1.135/ytb";
-    public static final String VIDEOS = IPADRESS +"/web/app_dev.php/getvid";
+//    private static final String IPADRESS = "http://192.168.1.135/ytb";
+//    public static final String VIDEOS = IPADRESS +"/web/app_dev.php/getvid";
 }

@@ -41,7 +41,7 @@ public class VideoRemoteDataSource implements VideoDataSource {
                                   @Nullable int lastOneId,
                                   final GetVideosCallBack callBack) {
         /* 通过网络请求获取视频信息*/
-        final String link = API.VIDEOS+"";
+        final String link = /*API.VIDEOS+*/"";
         new AsyncTask<String, Void, String>() {
             @Override
             protected String doInBackground(String... strings) {

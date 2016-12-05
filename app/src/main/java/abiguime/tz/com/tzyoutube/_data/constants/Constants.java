@@ -5,5 +5,5 @@ package abiguime.tz.com.tzyoutube._data.constants;
  */
 
 public class Constants {
-    public static String IP = "http://10.0.2.2/";
+    public static String IP = "http://192.168.1.220/";
 }

@@ -43,6 +43,7 @@ public class HomePageFragment extends Fragment
     private OnFragmentInteractionListener mListener;
     private RecyclerViewAdapter adapter;
     private LinearLayoutManager mLayoutManager;
+    private boolean isLoading = false;
 
     public HomePageFragment() {
         // Required empty public constructor
@@ -170,7 +171,10 @@ public class HomePageFragment extends Fragment
                     int pastVisibleItems = mLayoutManager.findFirstVisibleItemPosition();
                     if (pastVisibleItems + visibleItemCount >= totalItemCount) {
                         //End of list
-                        presenter.loadVideosFrom(videos.get(videos.size()-1).id);
+                        if (!isLoading) {
+                            presenter.loadVideosFrom(videos.get(videos.size()-1).id);
+                    isLoading = true;
+                        }
                     }
 
                 }
@@ -276,10 +280,11 @@ public class HomePageFragment extends Fragment
         public void appendDataBottom(List<Video> v) {
             int startAdd = videos.size();
             // 把数据添加到集合里
-            this.videos.addAll(videos.size()-1, v);
+            this.videos.addAll(videos.size(), v);
 //            HomePageFragment.this.videos.addAll(videos.size()-1, v);
             // 通知适配器有新的数据
-            adapter.notifyItemRangeInserted(startAdd, videos.size() - 1);
+            adapter.notifyItemRangeInserted(startAdd, videos.size());
+            isLoading = false;
         }
 
 
@@ -311,6 +316,7 @@ public class HomePageFragment extends Fragment
         }
     }
 
+    /* 由于 LinearLayoutManager中有一定的bug，需要自定义一下本对象*/
     public class WrapContentLinearLayoutManager extends LinearLayoutManager {
         public WrapContentLinearLayoutManager(Context context) {
             super(context);
@@ -338,7 +344,7 @@ public class HomePageFragment extends Fragment
         @Override
         public void getItemOffsets(Rect outRect, View view, RecyclerView parent, RecyclerView.State state) {
             super.getItemOffsets(outRect, view, parent, state);
-            if (parent.getChildAdapterPosition(view) == 0 || parent.getChildAdapterPosition(view) == adapter.getItemCount())
+            if (parent.getChildAdapterPosition(view) == 0)
                 return;
             // 两个视图之间的距离就是分划线的高度
             outRect.top = divider.getIntrinsicHeight();

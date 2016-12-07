@@ -1,5 +1,7 @@
 package abiguime.tz.com.tzyoutube._data;
 
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.os.SystemClock;
 
 import java.util.ArrayList;
@@ -12,8 +14,54 @@ import abiguime.tz.com.tzyoutube._data.constants.ImagesRepo;
  * Created by abiguime on 2016/11/30.
  */
 
-public class Video {
+public class Video implements Parcelable {
 
+
+    protected Video(Parcel in) {
+        id = in.readInt();
+        path = in.readString();
+        uploadTime = in.readLong();
+        likes = in.readInt();
+        dislikes = in.readInt();
+        duration = in.readFloat();
+        description = in.readString();
+        category = in.readInt();
+        user = in.readString();
+        title = in.readString();
+        coverimage = in.readString();
+    }
+
+    public static final Creator<Video> CREATOR = new Creator<Video>() {
+        @Override
+        public Video createFromParcel(Parcel in) {
+            return new Video(in);
+        }
+
+        @Override
+        public Video[] newArray(int size) {
+            return new Video[size];
+        }
+    };
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(id);
+        dest.writeString(path);
+        dest.writeLong(uploadTime);
+        dest.writeInt(likes);
+        dest.writeInt(dislikes);
+        dest.writeFloat(duration);
+        dest.writeString(description);
+        dest.writeInt(category);
+        dest.writeString(user);
+        dest.writeString(title);
+        dest.writeString(coverimage);
+    }
 
     /* 视频分类 */
     public enum Category {

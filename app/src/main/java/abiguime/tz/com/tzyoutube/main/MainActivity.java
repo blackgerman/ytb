@@ -1,5 +1,6 @@
 package abiguime.tz.com.tzyoutube.main;
 
+import android.app.ActivityOptions;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
@@ -10,41 +11,33 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.ColorFilter;
 import android.graphics.ColorMatrixColorFilter;
-import android.graphics.LinearGradient;
-import android.graphics.PorterDuff;
-import android.graphics.Shader;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.graphics.drawable.LayerDrawable;
-import android.graphics.drawable.ShapeDrawable;
 import android.graphics.drawable.StateListDrawable;
-import android.graphics.drawable.shapes.OvalShape;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Bundle;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.TabLayout;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.view.ViewCompat;
 import android.support.v4.view.ViewPager;
-import android.support.v4.widget.SearchViewCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
+import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
+import android.transition.Fade;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.SearchView;
 import android.widget.Toast;
 
 import java.lang.ref.WeakReference;
@@ -52,7 +45,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import abiguime.tz.com.tzyoutube.R;
-import abiguime.tz.com.tzyoutube._data.User;
 import abiguime.tz.com.tzyoutube._data.source.remote.UserRemoteDataSource;
 import abiguime.tz.com.tzyoutube._data.source.remote.VideoRemoteDataSource;
 import abiguime.tz.com.tzyoutube.main.fragment_home.HomePageContract;
@@ -70,6 +62,7 @@ public class MainActivity extends AppCompatActivity implements
         HomePageFragment.OnFragmentInteractionListener,
         HotPageFragment.OnFragmentInteractionListener {
 
+    public static final long DURATION = 300;
     /* 内部所有fragment的presenter */
     public HomePagePresenter homePagePresenter;
     public UserPagePresenter userPagePresenter;
@@ -91,10 +84,13 @@ public class MainActivity extends AppCompatActivity implements
     ViewPager vp;
     TabLayout tabs;
 
+    AppBarLayout appbar;
     Toolbar toolbar;
 
 
+
     private MainActivityPageAdapter vpadapter;
+
 
 
     @Override
@@ -228,12 +224,27 @@ public class MainActivity extends AppCompatActivity implements
             public void onTabReselected(TabLayout.Tab tab) {
             }
         });
+        vp.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+            }
+
+            @Override
+            public void onPageSelected(int position) {
+                appbar.setExpanded(true, true);
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state) {
+            }
+        });
     }
 
     private void initViews() {
 //        activity_frame = (FrameLayout) findViewById(R.id.activity_frame);
         vp = (ViewPager) findViewById(R.id.vpcontainer);
         tabs = (TabLayout) findViewById(R.id.tabs);
+        appbar = (AppBarLayout) findViewById(R.id.appbar);
     }
 
     private void initPresenter() {
@@ -249,6 +260,7 @@ public class MainActivity extends AppCompatActivity implements
                 drawableId),
                 iColor,
                 getResources());
+
     }
 
     // menus creationg
@@ -256,17 +268,36 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.search_menu, menu);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-            // Associate searchable configuration with the SearchView
-            SearchManager searchManager =
-                    (SearchManager) getSystemService(Context.SEARCH_SERVICE);
-            SearchView searchView =
-                    (SearchView) menu.findItem(R.id.search).getActionView();
-            searchView.setSearchableInfo(
-                    searchManager.getSearchableInfo(getComponentName()));
-        }
+        inflater.inflate(R.menu.menu_main2, menu);
+        menu.findItem(R.id.search).setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                jumpToSearch();
+                return true;
+            }
+        });
         return true;
+    }
+
+
+    private void jumpToSearch() {
+
+
+        Intent in = new Intent(this, SearchActivity.class);
+        // pass the toolbar between activities
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+
+            Fade fade = new Fade();
+            fade.setDuration(DURATION);
+            getWindow().setExitTransition(fade);
+            ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation(this,
+                    appbar, "trans_to_search");
+            // put the items to transfer
+            ActivityCompat.startActivity(this, in, options.toBundle());
+        } else {
+            startActivity(in);
+        }
     }
 
     private void goSearch() {

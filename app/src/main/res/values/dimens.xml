@@ -12,4 +12,6 @@
     <dimen name="item_margin_top">20dp</dimen>
     <dimen name="item_margin">16dp</dimen>
     <dimen name="progressbar_mini_fragment">35dp</dimen>
+    <dimen name="search_back_arrow_size">28dp</dimen>
+    <dimen name="text_margin">16dp</dimen>
 </resources>

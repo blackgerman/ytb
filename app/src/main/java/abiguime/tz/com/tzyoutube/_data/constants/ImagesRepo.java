@@ -64,9 +64,26 @@ public class ImagesRepo {
             "/ytbfake/covers/cover11.jpg",
             "/ytbfake/covers/cover12.jpg",
             "/ytbfake/covers/cover13.jpg",
+            "/ytbfake/covers/cover14.jpg",
+            "/ytbfake/covers/cover15.jpg",
+            "/ytbfake/covers/cover16.jpg",
+            "/ytbfake/covers/cover17.jpg",
+            "/ytbfake/covers/cover18.jpg",
     };
 
     // 视屏链接
     public static final String[] videos = {};
 
+    public static String[] channel = {
+            "VEVO",
+            "PTX",
+            "Kiiara",
+            "MaitreGims",
+            "Google_Devs",
+            "ObamaCare",
+            "Sauti Sol",
+            "Galactik Football",
+            "TheWeeknd",
+            "LaFouine",
+    };
 }

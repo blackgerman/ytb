@@ -1,2 +1,2 @@
-include ':app_pretrain', ':app'
+include  ':app'
 //, ':app_pretrain'

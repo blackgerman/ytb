@@ -20,10 +20,12 @@ import android.os.Bundle;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.ActivityManagerCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.pm.ActivityInfoCompat;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.view.ViewCompat;
 import android.support.v4.view.ViewPager;
@@ -31,6 +33,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.transition.Fade;
+import android.transition.Visibility;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -205,13 +208,12 @@ public class MainActivity extends AppCompatActivity implements
             public void onTabSelected(TabLayout.Tab tab) {
                 // 切换activity 标题
                 toolbar.setTitle(vpadapter.getPageTitle(tab.getPosition()));
-                // 更改viewpager 显示的位置
-//                Log.d("xxx", "")
+
+                // 绑定viewpager和当前点击的tab
                 vp.setCurrentItem(tab.getPosition());
 
                 // 之后再第一次切换到本fragment 的时候才会开始加载数据
                 if (tab.getPosition() == 1) {
-                    // hotfragment
                     ((HotPageFragment)frg.get(1).get()).setToLoad();
                 }
             }
@@ -290,13 +292,16 @@ public class MainActivity extends AppCompatActivity implements
 
             Fade fade = new Fade();
             fade.setDuration(DURATION);
+            fade.setMode(Visibility.MODE_OUT);
             getWindow().setExitTransition(fade);
+//            getWindow().setReenterTransition(fade);
             ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation(this,
                     appbar, "trans_to_search");
             // put the items to transfer
             ActivityCompat.startActivity(this, in, options.toBundle());
         } else {
             startActivity(in);
+            overridePendingTransition(android.R.anim.fade_in, 0);
         }
     }
 

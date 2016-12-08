@@ -101,7 +101,20 @@ public class SearchHistoryItemFragment extends Fragment implements SearchPageCon
         public void onBindViewHolder(final MySearchHistoryItemRecyclerViewAdapter.ViewHolder holder, int position) {
             holder.mItem = mValues.get(position);
             holder.mSearchContent.setText(mValues.get(position).name);
+            holder.mView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    mListener.search(holder.mItem.name);
+                }
+            });
+            holder.mright_suggestion.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    mListener.suggest(holder.mItem.name);
+                }
+            });
         }
+
 
         @Override
         public MySearchHistoryItemRecyclerViewAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -156,8 +169,10 @@ public class SearchHistoryItemFragment extends Fragment implements SearchPageCon
 
     public interface OnListFragmentInteractionListener {
         // TODO: Update argument type and name
-        void onListFragmentInteraction(HistoricalItem item);
+//        void onListFragmentInteraction(HistoricalItem item);
 //        void onQuerySent(String query);
+        void suggest(String suggest);
+        void search(String search);
     }
 
 }

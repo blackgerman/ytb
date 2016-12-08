@@ -14,4 +14,6 @@
     <dimen name="progressbar_mini_fragment">35dp</dimen>
     <dimen name="search_back_arrow_size">28dp</dimen>
     <dimen name="text_margin">16dp</dimen>
+    <dimen name="search_result_item_height">110dp</dimen>
+    <dimen name="search_result_imageview_height">75dp</dimen>
 </resources>

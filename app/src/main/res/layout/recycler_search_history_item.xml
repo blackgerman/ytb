@@ -35,8 +35,8 @@
         android:layout_gravity="end|center"
         android:id="@+id/iv_suggestion"
         android:background="?selectableItemBackgroundBorderless"
-        android:layout_width="48.0dip"
-        android:layout_height="match_parent"
+        android:layout_width="28dp"
+        android:layout_height="wrap_content"
         android:src="@drawable/ic_edit_suggestion"
         android:scaleType="centerInside"  />
 </LinearLayout>

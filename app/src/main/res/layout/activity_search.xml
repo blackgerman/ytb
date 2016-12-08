@@ -13,6 +13,7 @@
         android:transitionName="trans_to_search"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:nextFocusDown="@null"
         android:theme="@style/AppTheme.AppBarOverlay">
 
         <android.support.v7.widget.Toolbar
@@ -42,6 +43,7 @@
 
     <FrameLayout
         android:id="@+id/frame_layout"
+        android:layout_marginTop="?actionBarSize"
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>
 

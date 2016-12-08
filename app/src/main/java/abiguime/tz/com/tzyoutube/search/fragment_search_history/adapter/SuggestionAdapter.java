@@ -1,4 +1,4 @@
-package abiguime.tz.com.tzyoutube.search.adapter;
+package abiguime.tz.com.tzyoutube.search.fragment_search_history.adapter;
 
 import android.content.Context;
 import android.support.annotation.LayoutRes;

@@ -34,7 +34,8 @@ import abiguime.tz.com.tzyoutube.search.fragment_search_result.SearchResultPrese
 
 public class SearchActivity extends AppCompatActivity implements
         SearchResultItemFragment.OnListFragmentInteractionListener,
-        SearchHistoryItemFragment.OnListFragmentInteractionListener, SearchView.OnQueryTextListener {
+        SearchHistoryItemFragment.OnListFragmentInteractionListener,
+        SearchView.OnQueryTextListener, View.OnFocusChangeListener {
 
     private static final String[] SUGGESTIONS = {
             "Bauru", "Sao Paulo", "Rio de Janeiro",
@@ -59,6 +60,11 @@ public class SearchActivity extends AppCompatActivity implements
     private VideoRemoteDataSource videoRepo;
 
 
+    /* 是否在退出activity */
+    private boolean exiting = false;
+    private boolean isQuering = false;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -69,20 +75,20 @@ public class SearchActivity extends AppCompatActivity implements
 
         // searchview 默认已经打开而且可以直接输入内容
         searchView.setIconified(false);
-
         searchView.setOnQueryTextListener(this);
-
+        searchView.setOnQueryTextFocusChangeListener(this);
 
         ImageButton bt = (ImageButton) findViewById(R.id.iv_backtohome);
         bt.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
+                exiting = true;
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                     finishAfterTransition();
-                else {
+                } else {
                     finish();
+                    overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
                 }
-                Toast.makeText(SearchActivity.this, "Finish", Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -99,7 +105,16 @@ public class SearchActivity extends AppCompatActivity implements
         }
 
         // retrieve the data from the database and save put it in the fragment
+        initRepo();
         initFragments();
+    }
+
+    private void initRepo() {
+        videoRepo = new VideoRemoteDataSource(SearchActivity.this);
+    }
+
+    private void mT(String s) {
+        Toast.makeText(SearchActivity.this, s, Toast.LENGTH_SHORT).show();
     }
 
     private void initFragments() {
@@ -110,12 +125,7 @@ public class SearchActivity extends AppCompatActivity implements
             historicItempresenter = new SearchPageHistoricPresenter(historicListFragment, historicItemrepo);
             historicListFragment.setPresenter(historicItempresenter);
         }
-
-
-
         FragmentTransaction trans = getSupportFragmentManager().beginTransaction();
-//        trans.add(R.id.frame_layout, searchResultFragment, SearchHistoryItemFragment.TAG);
-//        trans.hide(searchResultFragment);
         trans.add(R.id.frame_layout, historicListFragment, SearchHistoryItemFragment.TAG);
         trans.commit();
     }
@@ -143,48 +153,45 @@ public class SearchActivity extends AppCompatActivity implements
     }
 
 
-    @Override
-    public void onListFragmentInteraction(HistoricalItem item) {
-        // ...
-    }
-
 
     /* 提交搜搜的操作*/
     @Override
-    public boolean onQueryTextSubmit(String query) {
-        Log.d("xxx", "onQueryTextSubmit");
-        //
-
-
+    public boolean onQueryTextSubmit(final String query) {
+        if (isQuering)
+            return true;
+        isQuering = true;
         final FragmentTransaction trans = getSupportFragmentManager().beginTransaction();
-        if (getSupportFragmentManager().findFragmentByTag(SearchResultItemFragment.TAG) == null) {
-            if (searchResultFragment == null) {
-                videoRepo = new VideoRemoteDataSource(this);
-                videoRepo.getHomePageVideos("", 10, new VideoDataSource.GetVideosCallBack() {
-                    @Override
-                    public void onVideoLoaded(List<Video> data) {
-                        searchResultFragment = SearchResultItemFragment.newInstance(data);
-                        searchResultPresenter = new SearchResultPresenter(searchResultFragment, videoRepo);
-                        searchResultFragment.setPresenter(searchResultPresenter);
-                        trans.add(R.id.frame_layout, searchResultFragment, SearchResultItemFragment.TAG);
-                        trans.hide(historicListFragment);
-                        trans.commit();
-                    }
+        videoRepo.getHomePageVideos("", 20, new VideoDataSource.GetVideosCallBack() {
 
-
-                    @Override
-                    public void onDataNotAvailable(String message) {
-                    }
-                });
-
-            }
-        } else {
-            searchResultFragment.sendRequest(query);
+            @Override
+            public void onVideoLoaded(List<Video> data) {
+                if (searchResultFragment == null) {
+                    searchResultFragment = SearchResultItemFragment.newInstance(data);
+                    searchResultPresenter = new SearchResultPresenter(searchResultFragment, videoRepo);
+                    searchResultFragment.setPresenter(searchResultPresenter);
+                    trans.add(R.id.frame_layout, searchResultFragment, SearchResultItemFragment.TAG);
+                    trans.hide(historicListFragment);
+                    trans.commit();
+                } else {
+                    searchResultFragment.sendRequest(query);
 //            searchResultFragment.showResult();
-            trans.show(searchResultFragment);
-            trans.hide(historicListFragment);
-            trans.commit();
-        }
+                    trans.show(searchResultFragment);
+                    trans.hide(historicListFragment);
+                    trans.commit();
+                }
+            }
+
+            @Override
+            public void onDataNotAvailable(String message) {
+            }
+        });
+
+        searchView.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                searchView.clearFocus();
+            }
+        }, 1000);
         return true;
     }
 
@@ -192,7 +199,37 @@ public class SearchActivity extends AppCompatActivity implements
     /* 当输入框字符串有变化*/
     @Override
     public boolean onQueryTextChange(String newText) {
-        Log.d("xxx", "onQueryTextChange");
         return true;
+    }
+
+    @Override
+    public void suggest(String suggest) {
+        searchView.setQuery(suggest, false);
+    }
+
+    @Override
+    public void search(String search) {
+        searchView.setQuery(search, true);
+    }
+
+    @Override
+    public void onVideoResultSelected(Video video) {
+        // play video sent by the fragment
+    }
+
+    @Override
+    public void onFocusChange(View v, boolean hasFocus) {
+
+        /*由于在finish过程中有时候会调用onfocuschange方法，就应该判断一下、
+        * 本方法只能在还没有finish之前运行*/
+        if (hasFocus && !exiting) {
+            // show the historic fragment
+            final FragmentTransaction trans = getSupportFragmentManager().beginTransaction();
+            if (searchResultFragment!=null)
+                trans.hide(searchResultFragment);
+            trans.show(historicListFragment);
+            trans.commit();
+            isQuering = false;
+        }
     }
 }

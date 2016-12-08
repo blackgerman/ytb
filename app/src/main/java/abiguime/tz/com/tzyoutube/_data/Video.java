@@ -29,6 +29,7 @@ public class Video implements Parcelable {
         user = in.readString();
         title = in.readString();
         coverimage = in.readString();
+        channel = in.readString();
     }
 
     public static final Creator<Video> CREATOR = new Creator<Video>() {
@@ -61,6 +62,7 @@ public class Video implements Parcelable {
         dest.writeString(user);
         dest.writeString(title);
         dest.writeString(coverimage);
+        dest.writeString(channel);
     }
 
     /* 视频分类 */
@@ -79,9 +81,11 @@ public class Video implements Parcelable {
     public String user;
     public String title;
     public String coverimage;
+    public String channel;
 
-    public Video(int id, String path, long uploadTime, int likes, int dislikes, int isactive, int duration, String description, int category, String user, String title, String coverimage) {
+    public Video(int id, String path, long uploadTime, int likes, int dislikes, int isactive, int duration, String description, int category, String user, String title, String coverimage, String channel) {
         this.id = id;
+       this.channel = channel;
         this.path = path;
         this.uploadTime = uploadTime;
         this.likes = likes;
@@ -110,7 +114,8 @@ public class Video implements Parcelable {
                     1, /// category
                     ImagesRepo.ppics[rd.nextInt(ImagesRepo.ppics.length)],
                     ImagesRepo.titles[rd.nextInt(ImagesRepo.titles.length)],
-                    ImagesRepo.covers[rd.nextInt(ImagesRepo.covers.length)]
+                    ImagesRepo.covers[rd.nextInt(ImagesRepo.covers.length)],
+                    ImagesRepo.channel[rd.nextInt(ImagesRepo.channel.length)]
             );
             vs.add(v);
         }

@@ -2,13 +2,12 @@
     <string name="app_name">TzYoutube</string>
 
     <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
-    <string name="title_activity_main2">Main2Activity</string>
-    <string name="action_settings">Settings</string>
+    <string name="hello_blank_fragment">你好空白Fragment</string>
+    <string name="action_settings">设置</string>
     <string name="section_format">Hello World from section: %1$d</string>
     <string name="home_tab">首页</string>
     <string name="hot_tab">时下流行</string>
     <string name="user_tab">账号</string>
-    <string name="search_title">Search Videos</string>
-    <string name="search_hint">Search videos</string>
+    <string name="search_title">Youtube搜索...</string>
+    <string name="search_hint">Youtube搜索...</string>
 </resources>

@@ -1,5 +1,10 @@
 package abiguime.tz.com.tzyoutube.main;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.AnimatorSet;
+import android.animation.ObjectAnimator;
+import android.animation.PropertyValuesHolder;
 import android.app.ActivityOptions;
 import android.app.SearchManager;
 import android.content.Context;
@@ -38,6 +43,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
 import android.view.Window;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -48,6 +54,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import abiguime.tz.com.tzyoutube.R;
+import abiguime.tz.com.tzyoutube._commons.customviews.YoutubeLayout;
+import abiguime.tz.com.tzyoutube._data.Video;
 import abiguime.tz.com.tzyoutube._data.source.remote.UserRemoteDataSource;
 import abiguime.tz.com.tzyoutube._data.source.remote.VideoRemoteDataSource;
 import abiguime.tz.com.tzyoutube.main.fragment_home.HomePageContract;
@@ -91,6 +99,9 @@ public class MainActivity extends AppCompatActivity implements
     Toolbar toolbar;
 
 
+    // YoutubeLayout
+    YoutubeLayout ytb;
+
 
     private MainActivityPageAdapter vpadapter;
 
@@ -103,12 +114,9 @@ public class MainActivity extends AppCompatActivity implements
 
         // 初始化view
         initViews();
-
         initActionBar();
-
         // 初始化内部的所有fragment 。。。 （ViewPager)
         initViewPager();
-
         // 初始化presenter
         initRemote();
         initPresenter();
@@ -247,14 +255,12 @@ public class MainActivity extends AppCompatActivity implements
         vp = (ViewPager) findViewById(R.id.vpcontainer);
         tabs = (TabLayout) findViewById(R.id.tabs);
         appbar = (AppBarLayout) findViewById(R.id.appbar);
+        ytb = (YoutubeLayout) findViewById(R.id.youtubelayout);
     }
 
     private void initPresenter() {
     }
 
-    @Override
-    public void onFragmentInteraction(Uri uri) {
-    }
 
     public Drawable filter(int drawableId) {
         int iColor = Color.parseColor("#FF5E1E1C");
@@ -301,7 +307,7 @@ public class MainActivity extends AppCompatActivity implements
             ActivityCompat.startActivity(this, in, options.toBundle());
         } else {
             startActivity(in);
-            overridePendingTransition(android.R.anim.fade_in, 0);
+            overridePendingTransition(0, 0);
         }
     }
 
@@ -325,6 +331,33 @@ public class MainActivity extends AppCompatActivity implements
         }
     }
 
+    // 是否第一次播放视频
+    boolean isFirst = false;
+
+
+    @Override
+    public void playVideo(Video video, View v) {
+        Toast.makeText(this, "Play "+video.toString(), Toast.LENGTH_SHORT).show();
+        if (ytb != null && ytb.getVisibility() != View.VISIBLE) {
+            ytb.setVisibility(View.VISIBLE);
+            ytb.requestHeaderContent();
+        }
+        ytb.setVideo(video, isFirst);
+
+       /* 如果是第一次播放，就从改视频的图片弹出我们的播放的布局*/
+     /*   if (isFirst && v != null) {
+            ObjectAnimator an = ObjectAnimator.ofFloat(ytb, View.TRANSLATION_Y, v.getY(), v.getY() -300);
+            an.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    super.onAnimationEnd(animation);
+                }
+            });
+            an.setDuration(300);
+            an.start();
+            isFirst = false;
+        }*/
+    }
 
 
     class MainActivityPageAdapter extends FragmentPagerAdapter {

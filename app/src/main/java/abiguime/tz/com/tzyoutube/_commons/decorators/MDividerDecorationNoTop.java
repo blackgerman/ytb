@@ -1,4 +1,4 @@
-package abiguime.tz.com.tzyoutube._commons;
+package abiguime.tz.com.tzyoutube._commons.decorators;
 
 import android.graphics.Canvas;
 import android.graphics.Rect;

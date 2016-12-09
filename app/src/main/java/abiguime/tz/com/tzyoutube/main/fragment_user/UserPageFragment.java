@@ -15,6 +15,7 @@ import android.widget.TextView;
 
 import abiguime.tz.com.tzyoutube.R;
 import abiguime.tz.com.tzyoutube._data.User;
+import abiguime.tz.com.tzyoutube._data.Video;
 import abiguime.tz.com.tzyoutube.main.fragment_home.HomePageFragment;
 
 
@@ -69,9 +70,6 @@ public class UserPageFragment extends Fragment implements UserPageContract.View 
 
     // TODO: Rename method, update argument and hook method into UI event
     public void onButtonPressed(Uri uri) {
-        if (mListener != null) {
-            mListener.onFragmentInteraction(uri);
-        }
     }
 
     @Override
@@ -132,6 +130,6 @@ public class UserPageFragment extends Fragment implements UserPageContract.View 
 
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
-        void onFragmentInteraction(Uri uri);
+        void playVideo(Video video, View v) ;
     }
 }

@@ -21,6 +21,7 @@ import android.widget.Toast;
 import java.util.List;
 
 import abiguime.tz.com.tzyoutube.R;
+import abiguime.tz.com.tzyoutube._commons.customviews.YoutubeLayout;
 import abiguime.tz.com.tzyoutube._data.HistoricalItem;
 import abiguime.tz.com.tzyoutube._data.Video;
 import abiguime.tz.com.tzyoutube._data.source.VideoDataSource;
@@ -63,6 +64,7 @@ public class SearchActivity extends AppCompatActivity implements
     /* 是否在退出activity */
     private boolean exiting = false;
     private boolean isQuering = false;
+    private YoutubeLayout youtubelayout;
 
 
     @Override
@@ -107,6 +109,16 @@ public class SearchActivity extends AppCompatActivity implements
         // retrieve the data from the database and save put it in the fragment
         initRepo();
         initFragments();
+        initYoutubeLayout();
+    }
+
+    private void initYoutubeLayout() {
+        if (youtubelayout.getVisibility()!= View.VISIBLE) {
+            youtubelayout.setVisibility(View.VISIBLE);
+            youtubelayout.requestHeaderContent();
+            youtubelayout.setVideo(Video.fakeVideos(1).get(0), false);
+            youtubelayout.smoothSlideTo(1f);
+        }
     }
 
     private void initRepo() {
@@ -134,6 +146,7 @@ public class SearchActivity extends AppCompatActivity implements
     private void initViews() {
         tb = (Toolbar) findViewById(R.id.toolbar);
         searchView = (SearchView) findViewById(R.id.mysearchview);
+        youtubelayout= (YoutubeLayout) findViewById(R.id.youtubelayout);
     }
 
 

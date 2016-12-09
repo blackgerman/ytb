@@ -24,7 +24,7 @@ import com.squareup.picasso.Picasso;
 import java.util.List;
 
 import abiguime.tz.com.tzyoutube.R;
-import abiguime.tz.com.tzyoutube._commons.MDividerDecorationNoTop;
+import abiguime.tz.com.tzyoutube._commons.decorators.MDividerDecorationNoTop;
 import abiguime.tz.com.tzyoutube._data.Video;
 import abiguime.tz.com.tzyoutube._data.constants.Constants;
 
@@ -91,9 +91,6 @@ public class HomePageFragment extends Fragment
 
     // TODO: Rename method, update argument and hook method into UI event
     public void onButtonPressed(Uri uri) {
-        if (mListener != null) {
-            mListener.onFragmentInteraction(uri);
-        }
     }
 
     @Override
@@ -249,7 +246,7 @@ public class HomePageFragment extends Fragment
 
             if (hold instanceof VideoItemViewHolder && position < videos.size()) {
                 VideoItemViewHolder holder = (VideoItemViewHolder) hold;
-                Video video = videos.get(position);
+                final Video video = videos.get(position);
                 holder.tvTitle.setText(video.title);
 
                 // 设置图片大小
@@ -266,6 +263,12 @@ public class HomePageFragment extends Fragment
                 // 设置到图片
                 Picasso.with(getContext()).load(Constants.IP + video.coverimage).into(holder.ivcover);
                 Picasso.with(getContext()).load(Constants.IP + video.user).into(holder.ivUser);
+                holder.mViews.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        mListener.playVideo(video, v);
+                    }
+                });
             } else {
                 // 这个是正在加载的对象
             }
@@ -296,11 +299,13 @@ public class HomePageFragment extends Fragment
 
         public class VideoItemViewHolder extends ViewHolder {
 
+            private final View mViews;
             public ImageView ivcover, ivUser;
             public TextView tvTitle;
 
             public VideoItemViewHolder(View itemView) {
                 super(itemView);
+                mViews = itemView;
                 ivcover = (ImageView) itemView.findViewById(R.id.imageview_cover);
                 ivUser = (ImageView) itemView.findViewById(R.id.iv_user);
                 tvTitle = (TextView) itemView.findViewById(R.id.tvtitle);
@@ -349,6 +354,6 @@ public class HomePageFragment extends Fragment
      */
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
-        void onFragmentInteraction(Uri uri);
+        void playVideo(Video video, View v);
     }
 }

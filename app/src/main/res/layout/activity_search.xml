@@ -47,4 +47,45 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>
 
+    <abiguime.tz.com.tzyoutube._commons.customviews.YoutubeLayout
+        android:layout_width="match_parent"
+        android:orientation="vertical"
+        android:visibility="invisible"
+        android:background="@android:color/transparent"
+        android:id="@+id/youtubelayout"
+        android:layout_height="match_parent">
+
+        <!--Videoview container
+                - must be transparent, but able to contain a video view
+                - able to send all the events to his backviews
+                - but if the event is on the videoview, just give it to him -->
+        <abiguime.tz.com.tzyoutube._commons.customviews.MyRelativeLayout
+            android:background="@android:color/transparent"
+            android:id="@+id/viewHeader"
+            android:layout_width="match_parent"
+            android:layout_height="0dp">
+            <ImageView
+                android:layout_gravity="right"
+                android:id="@+id/videoclub"
+                android:scaleType="centerCrop"
+                android:background="@drawable/loading_black_cover"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"/>
+        </abiguime.tz.com.tzyoutube._commons.customviews.MyRelativeLayout>
+
+        <LinearLayout
+            android:id="@+id/viewDesc"
+            android:tag="desc"
+            android:textSize="35sp"
+            android:gravity="center"
+            android:text="Loreum Loreum"
+            android:textColor="@android:color/white"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="#d658d6"
+            android:orientation="vertical">
+        </LinearLayout>
+    </abiguime.tz.com.tzyoutube._commons.customviews.YoutubeLayout>
+
+
 </android.support.design.widget.CoordinatorLayout>

@@ -16,4 +16,6 @@
     <dimen name="text_margin">16dp</dimen>
     <dimen name="search_result_item_height">110dp</dimen>
     <dimen name="search_result_imageview_height">75dp</dimen>
+    <dimen name="item_margin_bottom">8dp</dimen>
+    <dimen name="item_margin_margin">8dp</dimen>
 </resources>

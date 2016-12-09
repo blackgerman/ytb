@@ -9,6 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import abiguime.tz.com.tzyoutube.R;
+import abiguime.tz.com.tzyoutube._data.Video;
 import abiguime.tz.com.tzyoutube.main.fragment_home.HomePageFragment;
 
 /**
@@ -43,9 +44,6 @@ public class HotPageFragment extends Fragment {
 
     // TODO: Rename method, update argument and hook method into UI event
     public void onButtonPressed(Uri uri) {
-        if (mListener != null) {
-            mListener.onFragmentInteraction(uri);
-        }
     }
 
     @Override
@@ -85,6 +83,6 @@ public class HotPageFragment extends Fragment {
      */
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
-        void onFragmentInteraction(Uri uri);
+        void playVideo(Video video, View v) ;
     }
 }

@@ -23,7 +23,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import abiguime.tz.com.tzyoutube.R;
-import abiguime.tz.com.tzyoutube._commons.MDividerDecorationNoTop;
 import abiguime.tz.com.tzyoutube._data.Video;
 import abiguime.tz.com.tzyoutube._data.constants.Constants;
 

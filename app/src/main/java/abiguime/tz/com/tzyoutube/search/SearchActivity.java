@@ -98,7 +98,6 @@ public class SearchActivity extends AppCompatActivity implements
         View searchPlate = searchView.findViewById(android.support.v7.appcompat.R.id.search_plate);
         searchPlate.setBackgroundColor(Color.TRANSPARENT);
 
-
         // material design activity 共享视图
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             Fade fade = new Fade();

@@ -22,6 +22,7 @@ import java.util.List;
 
 import abiguime.tz.com.tzyoutube.R;
 import abiguime.tz.com.tzyoutube._commons.customviews.YoutubeLayout;
+import abiguime.tz.com.tzyoutube._commons.customviews.YoutubeLayout2;
 import abiguime.tz.com.tzyoutube._data.HistoricalItem;
 import abiguime.tz.com.tzyoutube._data.Video;
 import abiguime.tz.com.tzyoutube._data.source.VideoDataSource;
@@ -64,7 +65,7 @@ public class SearchActivity extends AppCompatActivity implements
     /* 是否在退出activity */
     private boolean exiting = false;
     private boolean isQuering = false;
-    private YoutubeLayout youtubelayout;
+    private YoutubeLayout2 ytb;
 
 
     @Override
@@ -111,13 +112,21 @@ public class SearchActivity extends AppCompatActivity implements
         initYoutubeLayout();
     }
 
+
+
+    private boolean isFirst = true;
+
     private void initYoutubeLayout() {
-        if (youtubelayout.getVisibility()!= View.VISIBLE) {
+        /*   if (youtubelayout.getVisibility()!= View.VISIBLE) {
             youtubelayout.setVisibility(View.VISIBLE);
             youtubelayout.requestHeaderContent();
-            youtubelayout.setVideo(Video.fakeVideos(1).get(0), false);
-            youtubelayout.smoothSlideTo(1f);
+            youtubelayout.setVideo(Video.fakeVideos(1).get(0), true);
+            youtubelayout.smoothSlideTo(0f);
+        }*/
+        if (ytb != null && ytb.getVisibility() != View.VISIBLE) {
+            ytb.setVisibility(View.VISIBLE);
         }
+        ytb.setVideo(Video.fakeVideos(1).get(0), isFirst);
     }
 
     private void initRepo() {
@@ -145,7 +154,7 @@ public class SearchActivity extends AppCompatActivity implements
     private void initViews() {
         tb = (Toolbar) findViewById(R.id.toolbar);
         searchView = (SearchView) findViewById(R.id.mysearchview);
-        youtubelayout= (YoutubeLayout) findViewById(R.id.youtubelayout);
+        ytb= (YoutubeLayout2) findViewById(R.id.youtubelayout);
     }
 
 
@@ -234,14 +243,18 @@ public class SearchActivity extends AppCompatActivity implements
 
         /*由于在finish过程中有时候会调用onfocuschange方法，就应该判断一下、
         * 本方法只能在还没有finish之前运行*/
-        if (hasFocus && !exiting) {
-            // show the historic fragment
-            final FragmentTransaction trans = getSupportFragmentManager().beginTransaction();
-            if (searchResultFragment!=null)
-                trans.hide(searchResultFragment);
-            trans.show(historicListFragment);
-            trans.commit();
-            isQuering = false;
+        try {
+            if (hasFocus && !exiting) {
+                // show the historic fragment
+                final FragmentTransaction trans = getSupportFragmentManager().beginTransaction();
+                if (searchResultFragment!=null)
+                    trans.hide(searchResultFragment);
+                trans.show(historicListFragment);
+                trans.commit();
+                isQuering = false;
+            }
+        }catch (Exception e) {
+            e.printStackTrace();
         }
     }
 }

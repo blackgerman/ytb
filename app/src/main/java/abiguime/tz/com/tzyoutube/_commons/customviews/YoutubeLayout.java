@@ -151,7 +151,7 @@ public class YoutubeLayout extends ViewGroup {
             // 0 :: 黑色
             Drawable dr = new ColorDrawable(Color.BLACK);
             int alpha =  (int) ((1-mDragOffset)*255);
-            dr.setAlpha(alpha > 255 ? 255 : alpha);
+            dr.setAlpha(alpha < 0 ? 0 : alpha);
             setBackground(dr);
             requestLayout();
         }

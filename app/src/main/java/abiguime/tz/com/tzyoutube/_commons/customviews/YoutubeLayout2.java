@@ -9,9 +9,12 @@ import android.support.v4.view.ViewCompat;
 import android.support.v4.widget.ViewDragHelper;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
+import android.widget.RelativeLayout;
 
 import abiguime.tz.com.tzyoutube.R;
 import abiguime.tz.com.tzyoutube._data.Video;
@@ -21,12 +24,12 @@ import abiguime.tz.com.tzyoutube._data.Video;
  * Created by abiguime on 2016/8/4.
  */
 
-public class YoutubeLayout2 extends ViewGroup {
+public class YoutubeLayout2 extends RelativeLayout {
 
     private final ViewDragHelper myDragerHelper;
 
     private View  mDescView;
-    private MyRelativeLayout mHeaderView;
+    private MyRelativeLayout2 mHeaderView;
 
     private float initialMotionX, initialMotionY;
 
@@ -68,8 +71,7 @@ public class YoutubeLayout2 extends ViewGroup {
     protected void onFinishInflate() {
         super.onFinishInflate();
         mDescView = findViewById(R.id.viewDesc);
-        mHeaderView = (MyRelativeLayout) findViewById(R.id.viewHeader);
-        // force the iamgeview to redraw
+        mHeaderView = (MyRelativeLayout2) findViewById(R.id.viewHeader);
     }
 
     /* OnLayout is need to tell a view how is he going to draw
@@ -81,33 +83,29 @@ public class YoutubeLayout2 extends ViewGroup {
         dragRange = getHeight() - mHeaderView.getHeight();
         // remove margin bottom
         dragRange -= getContext().getResources().getDimensionPixelSize(R.dimen.item_margin_bottom);
-        /*positions of the top and bottom views have to be computed
-        * programmatically
-        * */
         if (justStarted) {
-            justStarted = false;
-            mTop = getHeight() -
-                    getVideo16_9Height() -
-                    getContext().getResources().getDimensionPixelSize(R.dimen.item_margin_bottom);;
-            mHeaderView.setPivotY(getVideo16_9Height());
-            mHeaderView.setScaleY(1/3);
+            mTop = dragRange;
+            // initial position
+            mHeaderView.layout(0, mTop, r, mTop+mHeaderView.getMeasuredHeight());
+            mDescView.layout(0,mTop+mHeaderView.getMeasuredHeight(), r, b+mTop);
+            return;
         }
-        // initial positions.
         mHeaderView.layout(0, mTop, r, mTop+mHeaderView.getMeasuredHeight());
-        mDescView.layout(0,mTop+mHeaderView.getMeasuredHeight(), r, b+mTop)
-        ;
+        mDescView.layout(0,mTop+mHeaderView.getMeasuredHeight(), r, b+mTop);
     }
 
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-        measureChildren(widthMeasureSpec, heightMeasureSpec);
-        int maxWidth = MeasureSpec.getSize(widthMeasureSpec);
-        int maxHeight = MeasureSpec.getSize(heightMeasureSpec);
+        if (justStarted) {
+            measureChildren(widthMeasureSpec, heightMeasureSpec);
+            int maxWidth = MeasureSpec.getSize(widthMeasureSpec);
+            int maxHeight = MeasureSpec.getSize(heightMeasureSpec);
 
-        setMeasuredDimension(resolveSizeAndState(maxWidth, widthMeasureSpec, 0),
-                resolveSizeAndState(maxHeight, heightMeasureSpec, 0));
+            setMeasuredDimension(resolveSizeAndState(maxWidth, widthMeasureSpec, 0),
+                    resolveSizeAndState(maxHeight, heightMeasureSpec, 0));
+        }
     }
 
     /*设置改播放的音乐*/
@@ -118,17 +116,6 @@ public class YoutubeLayout2 extends ViewGroup {
             smoothSlideTo(0f);
     }
 
-    public void requestHeaderContent() {
-        if (mHeaderView != null) {
-            postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    mHeaderView.setVideoClubSize();
-                    mHeaderView.setBackgroundResource(android.R.color.transparent);
-                }
-            }, 300);
-        }
-    }
 
     private class MyDragHelper extends ViewDragHelper.Callback{
 
@@ -140,6 +127,7 @@ public class YoutubeLayout2 extends ViewGroup {
         @Override
         public void onViewPositionChanged(View changedView, int left, int top, int dx, int dy) {
 
+            Log.d("xxx", "onViewPositionChanged");
             mTop = top;
             mDragOffset = (float) top / dragRange;
             mHeaderView.setPivotY(mHeaderView.getHeight());
@@ -254,6 +242,10 @@ public class YoutubeLayout2 extends ViewGroup {
         // check whether the view supplied is under the given point.
         // as a draging action or what so ever...
         boolean isHeaderViewUnder = myDragerHelper.isViewUnder(mHeaderView, (int)x, (int)y);
+        if (isHeaderViewUnder && justStarted) {
+            justStarted = false;
+            mHeaderView.setInitialMotion(false);
+        }
 
         switch (action & MotionEvent.ACTION_MASK) {
 
@@ -302,10 +294,6 @@ public class YoutubeLayout2 extends ViewGroup {
         final int topBound = getPaddingTop();
         int y = (int) (topBound + slideOffset * dragRange);
         int x = mHeaderView.getLeft();
-        /*if (slideOffset == 1) {
-            y -= getContext().getResources().getDimensionPixelSize(R.dimen.item_margin_bottom);
-            x -= getContext().getResources().getDimensionPixelSize(R.dimen.item_margin_margin);
-        }*/
         if (myDragerHelper.smoothSlideViewTo(mHeaderView, x, y)) {
             ViewCompat.postInvalidateOnAnimation(this);
             return true;
@@ -313,11 +301,20 @@ public class YoutubeLayout2 extends ViewGroup {
         return false;
     }
 
+    public boolean slideTo (float slideOffset) {
+        final int topBound = getPaddingTop();
+        int x = mHeaderView.getLeft();
+        int y = (int) (topBound + slideOffset * dragRange);
+        mHeaderView.setX(x);
+        mHeaderView.setY(y);
+        return false;
+    }
+
     public View getmDescView() {
         return mDescView;
     }
 
-    public MyRelativeLayout getmHeaderView() {
+    public MyRelativeLayout2 getmHeaderView() {
         return mHeaderView;
     }
 }

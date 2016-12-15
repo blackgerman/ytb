@@ -18,4 +18,7 @@
     <dimen name="search_result_imageview_height">75dp</dimen>
     <dimen name="item_margin_bottom">8dp</dimen>
     <dimen name="item_margin_margin">8dp</dimen>
+    <dimen name="progressbar_bg_size">1dp</dimen>
+    <dimen name="thumbHeight">20dp</dimen>
+    <dimen name="thumbHeight_inner">14dp</dimen>
 </resources>

@@ -25,6 +25,7 @@ import abiguime.tz.com.tzyoutube._commons.customviews.YoutubeLayout;
 import abiguime.tz.com.tzyoutube._commons.customviews.YoutubeLayout2;
 import abiguime.tz.com.tzyoutube._data.HistoricalItem;
 import abiguime.tz.com.tzyoutube._data.Video;
+import abiguime.tz.com.tzyoutube._data.constants.Constants;
 import abiguime.tz.com.tzyoutube._data.source.VideoDataSource;
 import abiguime.tz.com.tzyoutube._data.source.local.HistoricalItemDataSource;
 import abiguime.tz.com.tzyoutube._data.source.remote.VideoRemoteDataSource;
@@ -110,23 +111,24 @@ public class SearchActivity extends AppCompatActivity implements
         initRepo();
         initFragments();
         initYoutubeLayout();
+        initMediaPlayer();
     }
 
+
+
+    private void initMediaPlayer() {
+        if (getIntent().getBooleanExtra("isplaying", false)) {
+            ytb.continueVideo(false);
+        }
+    }
 
 
     private boolean isFirst = true;
 
     private void initYoutubeLayout() {
-        /*   if (youtubelayout.getVisibility()!= View.VISIBLE) {
-            youtubelayout.setVisibility(View.VISIBLE);
-            youtubelayout.requestHeaderContent();
-            youtubelayout.setVideo(Video.fakeVideos(1).get(0), true);
-            youtubelayout.smoothSlideTo(0f);
-        }*/
         if (ytb != null && ytb.getVisibility() != View.VISIBLE) {
             ytb.setVisibility(View.VISIBLE);
         }
-        ytb.setVideo(Video.fakeVideos(1).get(0), isFirst);
     }
 
     private void initRepo() {
@@ -150,13 +152,11 @@ public class SearchActivity extends AppCompatActivity implements
         trans.commit();
     }
 
-
     private void initViews() {
         tb = (Toolbar) findViewById(R.id.toolbar);
         searchView = (SearchView) findViewById(R.id.mysearchview);
         ytb= (YoutubeLayout2) findViewById(R.id.youtubelayout);
     }
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -173,6 +173,14 @@ public class SearchActivity extends AppCompatActivity implements
         mAdapter.changeCursor(c);
     }
 
+    public void playVideo(Video video, View v) {
+        Toast.makeText(this, "Play "+video.toString(), Toast.LENGTH_SHORT).show();
+        if (ytb != null && ytb.getVisibility() != View.VISIBLE) {
+            ytb.setVisibility(View.VISIBLE);
+        }
+        ytb.setVideo(video, isFirst);
+        // play video inside the subview
+    }
 
 
     /* 提交搜搜的操作*/

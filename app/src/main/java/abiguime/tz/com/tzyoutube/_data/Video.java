@@ -104,7 +104,7 @@ public class Video implements Parcelable {
         for (int i = 0; i < count; i++) {
             Random rd = new Random();
             Video v = new Video((int) SystemClock.currentThreadTimeMillis(),
-                    "",
+                    ImagesRepo.videos[rd.nextInt(ImagesRepo.videos.length)],
                     0, // upload time
                     rd.nextInt(200000),
                     rd.nextInt(200),

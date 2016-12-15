@@ -41,6 +41,21 @@ public class ImagesRepo {
             "/ytbfake/ppics/pp10.jpg",
     };
 
+    // 视屏链接
+    public static final String[] videos = {
+            "/ytbfake/videos/video01.mp4",
+            "/ytbfake/videos/video02.mp4",
+            "/ytbfake/videos/video03.mp4",
+            "/ytbfake/videos/video04.mp4",
+            "/ytbfake/videos/video05.mp4",
+            "/ytbfake/videos/video06.mp4",
+            "/ytbfake/videos/video07.mp4",
+            "/ytbfake/videos/video08.mp4",
+            "/ytbfake/videos/video09.mp4",
+            "/ytbfake/videos/video10.mp4",
+
+    };
+
 
 
     // 等用户的自己账号主页背景图
@@ -71,8 +86,7 @@ public class ImagesRepo {
             "/ytbfake/covers/cover18.jpg",
     };
 
-    // 视屏链接
-    public static final String[] videos = {};
+
 
     public static String[] channel = {
             "VEVO",

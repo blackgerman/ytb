@@ -10,23 +10,14 @@ android {
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
-//        externalNativeBuild {
-//            cmake {
-//                cppFlags ""
-//            }
-//        }
     }
     buildTypes {
         release {
-            minifyEnabled false
+            shrinkResources true // 是否压缩app 的资源
+            minifyEnabled true // 是否在apk 包含没用到的资源
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
-//    externalNativeBuild {
-//        cmake {
-//            path "CMakeLists.txt"
-//        }
-//    }
 }
 
 dependencies {

@@ -15,5 +15,8 @@
     <color name="text_secondary_gray">#aaaaaa</color>
     <color name="app_divider_color">#aaaaaa</color>
 
+    <color name="transparentcolorPrimary">#88e62019</color>
+   <color name="buffering_gray">#995a5d5a</color>
+
 
 </resources>

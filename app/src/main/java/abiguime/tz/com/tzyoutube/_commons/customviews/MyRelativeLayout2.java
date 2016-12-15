@@ -4,8 +4,10 @@ import android.content.Context;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -23,10 +25,14 @@ import abiguime.tz.com.tzyoutube._data.constants.Constants;
 public class MyRelativeLayout2 extends LinearLayout {
 
 
-    private ImageView videoclub;
+
     private boolean hasFinishInflate = false;
     private Video video;
 
+    // surfaceview
+    SurfaceView sv;
+    // imageview
+    ImageView iv;
     private boolean initialMotion = true;
 
     public MyRelativeLayout2(Context context) {
@@ -42,32 +48,17 @@ public class MyRelativeLayout2 extends LinearLayout {
         setOrientation(VERTICAL);
     }
 
+    private FrameLayout frame_playback;
+
+
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
-//        videoclub = findViewById(R.id.videoclub);
+        frame_playback = (FrameLayout) findViewById(R.id.frame_playback);
+        iv = (ImageView) findViewById(R.id.iv_videoclub);
+        sv = (SurfaceView) findViewById(R.id.sv_videoclub);
         hasFinishInflate = true;
-        Log.d("xxx", "onFinishInflate");
-      /*  <ImageView
-        android:layout_gravity="right"
-        android:id="@+id/videoclub"
-        android:scaleType="centerCrop"
-        android:background="@drawable/loading_black_cover"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-                />*/
-        videoclub = new ImageView(getContext());
-        videoclub.setScaleType(ImageView.ScaleType.CENTER_CROP);
-        videoclub.setBackgroundResource(R.drawable.loading_black_cover);
-        MyRelativeLayout2.LayoutParams params = new LayoutParams(0, 0);
-        params.gravity = Gravity.RIGHT;
-//        params.width = getContext().getResources().getDisplayMetrics().widthPixels/3;
-//        params.height = 9*params.height/16;
-        videoclub.setLayoutParams(params);
-        addView(videoclub);
-        setVideoClubSize();
     }
-
 
 
     @Override
@@ -92,37 +83,56 @@ public class MyRelativeLayout2 extends LinearLayout {
     public void setVideoClubSize () {
         if (getHeight() == 0 || getWidth() == 0)
             return;
-        LayoutParams layoutParams = (LayoutParams) videoclub.getLayoutParams();
+        MyRelativeLayout2.LayoutParams layoutParams = (LayoutParams) frame_playback.getLayoutParams();
         layoutParams.height = getHeight();
         layoutParams.width = getWidth();//(initialMotion ? 3:1);
         //添加margin
         layoutParams.rightMargin = (int) (getContext().getResources().getDimensionPixelSize(R.dimen.item_margin_bottom)
                 * (1-getScaleY() + (initialMotion?1:0))); // 1
-        videoclub.setLayoutParams(layoutParams);
+        frame_playback.setLayoutParams(layoutParams);
 
+        frame_playback.setScaleX((initialMotion ? (1f/3f): getScaleY()));
+        frame_playback.setPivotX(getWidth());
 
-        videoclub.setScaleX((initialMotion ? (1f/3f): getScaleY()));
-        videoclub.setPivotX(getWidth());
-
-        videoclub.setScaleY((initialMotion ? (1f/3f): 1));
-        videoclub.setPivotY(getHeight());
+        frame_playback.setScaleY((initialMotion ? (1f/3f): 1));
+        frame_playback.setPivotY(getHeight());
     }
+
+
 
     public void setInitialMotion(boolean initialMotion) {
         this.initialMotion = initialMotion;
     }
 
-    public void setVideo(Video video) {
-        this.video = video;
-        Picasso.with(getContext()).load(Constants.IP + video.coverimage)
-                .placeholder(R.drawable.loading_black_cover)
-                .into((ImageView) videoclub);
+
+    public SurfaceView getSv() {
+        return sv;
+    }
+
+    public ImageView getIv() {
+        return iv;
+    }
+
+    // 按照视频大小更改surfaceview的大小
+    public void setSvSize(int videoWidth, int videoHeight) {
+        // 不能超过的高宽
+        int maxWidth =  getContext().getResources().getDisplayMetrics().widthPixels;
+        int maxHeight = 9* maxWidth /16;
+        FrameLayout.LayoutParams fr = (FrameLayout.LayoutParams) sv.getLayoutParams();
+        int newHeight = videoHeight, newWidth = videoWidth;
+        // 视频时垂直方向显示
+        if (videoHeight > maxHeight) {
+            newHeight = maxHeight;
+            newWidth = (int) (videoWidth * ((float)maxHeight/ (float)videoHeight));
+        }
+        fr.height = newHeight;
+        fr.width = newWidth;
+        fr.gravity = Gravity.CENTER;
+        sv.setLayoutParams(fr);
     }
 
     private int getVideo16_9Height() {
         return 9*getResources().getDisplayMetrics().widthPixels/16;
     }
-
-
 
 }

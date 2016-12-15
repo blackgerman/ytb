@@ -5,7 +5,6 @@
     android:id="@+id/main_content"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fitsSystemWindows="true"
     tools:context="abiguime.tz.com.tzyoutube.main.MainActivity">
 
     <android.support.design.widget.CoordinatorLayout
@@ -54,8 +53,8 @@
         android:visibility="invisible"
         android:background="@android:color/transparent"
         android:id="@+id/youtubelayout"
-        android:layout_height="match_parent">
 
+        android:layout_height="match_parent">
         <!--Videoview container
                 - must be transparent, but able to contain a video view
                 - able to send all the events to his backviews
@@ -65,15 +64,47 @@
             android:id="@+id/viewHeader"
             android:layout_width="match_parent"
             android:layout_height="0dp">
-            <ImageView
+            <FrameLayout
+                android:fitsSystemWindows="true"
+                android:background="@android:color/black"
                 android:layout_gravity="right"
-                android:id="@+id/videoclub"
-                android:scaleType="centerCrop"
-                android:background="@drawable/loading_black_cover"
+                android:id="@+id/frame_playback"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"/>
+                android:layout_height="match_parent">
+                <!-- 显示视频的view-->
+                <SurfaceView
+                    android:layout_gravity="right"
+                    android:id="@+id/sv_videoclub"
+                    android:layout_width="0dp"
+                    android:visibility="invisible"
+                    android:layout_height="0dp"/>
+                <!-- 显示视频的介绍图片的view-->
+                <ImageView
+                    android:id="@+id/iv_videoclub"
+                    android:visibility="visible"
+                    android:layout_gravity="right"
+                    android:scaleType="centerCrop"
+                    android:background="@drawable/loading_black_cover"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"/>
+                <!-- 显示播放与暂停动画的imageview -->
+                <ImageView
+                    android:id="@+id/iv_play_pause"
+                    android:src="@drawable/pause_drawable"
+                    android:background="@drawable/play_pause_cercle_background"
+                    android:layout_gravity="center"
+                    android:visibility="invisible"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp" />
+                <abiguime.tz.com.tzyoutube._commons.customviews.CustomSeekbar
+                    android:id="@+id/myseekbar"
+                    android:layout_width="match_parent"
+                    android:thumb="@drawable/progressthumb"
+                    android:progressDrawable="@drawable/playback_custom_progress_drawable"
+                    android:layout_gravity="bottom"
+                    android:layout_height="@dimen/thumbHeight" />
+            </FrameLayout>
         </abiguime.tz.com.tzyoutube._commons.customviews.MyRelativeLayout>
-
         <LinearLayout
             android:id="@+id/viewDesc"
             android:tag="desc"
@@ -86,5 +117,5 @@
             android:background="#d658d6"
             android:orientation="vertical">
         </LinearLayout>
-</abiguime.tz.com.tzyoutube._commons.customviews.YoutubeLayout>
+    </abiguime.tz.com.tzyoutube._commons.customviews.YoutubeLayout>
 </FrameLayout>

@@ -1,9 +1,15 @@
 package abiguime.tz.com.tzyoutube._commons.customviews;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.ObjectAnimator;
 import android.content.Context;
+import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
+import android.media.AudioManager;
+import android.media.MediaPlayer;
 import android.support.v4.view.MotionEventCompat;
 import android.support.v4.view.ViewCompat;
 import android.support.v4.widget.ViewDragHelper;
@@ -11,20 +17,35 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
+import android.view.SurfaceHolder;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
+import android.widget.Toast;
+
+import com.squareup.picasso.Picasso;
 
 import abiguime.tz.com.tzyoutube.R;
+import abiguime.tz.com.tzyoutube._commons.core.YtbApplication;
+import abiguime.tz.com.tzyoutube._commons.utils.ULog;
 import abiguime.tz.com.tzyoutube._data.Video;
+import abiguime.tz.com.tzyoutube._data.constants.Constants;
 
 
 /**
  * Created by abiguime on 2016/8/4.
  */
 
-public class YoutubeLayout2 extends RelativeLayout {
+public class YoutubeLayout2 extends RelativeLayout implements
+// videos playback interfaces
+        SurfaceHolder.Callback,
+        MediaPlayer.OnCompletionListener,
+        MediaPlayer.OnBufferingUpdateListener ,
+        MediaPlayer.OnPreparedListener,
+        MediaPlayer.OnVideoSizeChangedListener{
+
+    private static final String TAG = YoutubeLayout2.class.getName();
 
     private final ViewDragHelper myDragerHelper;
 
@@ -52,6 +73,7 @@ public class YoutubeLayout2 extends RelativeLayout {
     private float SENSITIVITY = 1.0f;
 
     public boolean justStarted = true;
+    private MediaPlayer mp;
 
     public YoutubeLayout2(Context context) {
         this(context, null);
@@ -110,12 +132,137 @@ public class YoutubeLayout2 extends RelativeLayout {
 
     /*设置改播放的音乐*/
     public void setVideo(Video video, boolean isFirst) {
-        mHeaderView.setVideo(video);
+        // 设置视频的主要图片 （作为正在加载图）
+        setLoadingCover(video);
+        // 启动播放
+        startMediaPlayerPlayBack(video);
         // 把显示视频的viewgroup 显示成全屏
         if (!isFirst)
             smoothSlideTo(0f);
     }
 
+    /*isfirst表示启动播放以后要不要启动动画*/
+    public void continueVideo (boolean isFirst) {
+        // 接着mainactivity 播放
+        continueMediaPlayerPlayBack();
+        if (!isFirst)
+            smoothSlideTo(0f);
+    }
+
+
+    private void startMediaPlayerPlayBack(Video video) {
+//        ((YtbApplication) getContext().getApplicationContext())
+//                .getMediaPlayerFor(Constants.IP + video.path, this);
+    }
+
+    private void continueMediaPlayerPlayBack() {
+        mp = ((YtbApplication) getContext().getApplicationContext())
+                .getMediaPlayer();
+        mp.setOnBufferingUpdateListener(this); // 缓存更新监听
+        mp.setOnCompletionListener(this); // 播放完毕监听
+        mp.setScreenOnWhilePlaying(true); // 在播放期间屏幕必须保持量的状态
+        mp.setOnVideoSizeChangedListener(this); // 在视频大小手变化时 (重新设置surfaceview 的大小)
+        mp.setAudioStreamType(AudioManager.STREAM_MUSIC); // 设置音乐频道
+        mHeaderView.getSv().getHolder().addCallback(this); // 绑定surfaceview和mediaplayer
+    }
+
+    private void setLoadingCover(Video video) {
+        Picasso.with(getContext()).load(Constants.IP + video.coverimage)
+                .placeholder(R.drawable.loading_black_cover)
+                .into(mHeaderView.getIv());
+        mHeaderView.getIv().setVisibility(VISIBLE);
+    }
+    @Override
+    public void onBufferingUpdate(MediaPlayer mp, int percent) {
+
+    }
+
+    @Override
+    public void onCompletion(MediaPlayer mp) {
+
+    }
+
+    /* 当prepareAsync 运行完成时，就会调用本方法*/
+    @Override
+    public void onPrepared(final MediaPlayer mp) {
+        if (mp == null) {
+            Toast.makeText(getContext(), "Mediaplayer null", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        mp.setOnBufferingUpdateListener(YoutubeLayout2.this); // 缓存更新监听
+        mp.setOnCompletionListener(YoutubeLayout2.this); // 播放完毕监听
+        mp.setOnPreparedListener(YoutubeLayout2.this); // 准备完成监听（prepareAsync）
+        mp.setScreenOnWhilePlaying(true); // 在播放期间屏幕必须保持量的状态
+        mp.setOnVideoSizeChangedListener(YoutubeLayout2.this); // 在视频大小手变化时 (重新设置surfaceview 的大小)
+        mp.setAudioStreamType(AudioManager.STREAM_MUSIC); // 设置音乐频道
+        mHeaderView.getSv().getHolder().addCallback(YoutubeLayout2.this); // 绑定surfaceview和mediaplayer
+
+        postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    // 启动视频播放;
+                    mHeaderView.setSvSize(mp.getVideoWidth(), mp.getVideoHeight());
+                    ULog.d("xxx", "vheight "+mp.getVideoHeight()+" -- vwidth "+mp.getVideoWidth());
+                    mp.start();
+                } catch (IllegalStateException e) {
+                    e.printStackTrace();
+                }
+                ObjectAnimator anim = ObjectAnimator.ofFloat(mHeaderView.getIv(),
+                        View.ALPHA, 1f, 0f);
+                anim.setDuration(500/2);
+                anim.start();
+                anim.addListener(new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        super.onAnimationEnd(animation);
+                        mHeaderView.getIv().setVisibility(GONE);
+                    }
+                });
+            }
+        }, 500);
+    }
+
+
+
+    @Override
+    public void onVideoSizeChanged(MediaPlayer mp, int width, int height) {
+    }
+
+    @Override
+    public void surfaceCreated(SurfaceHolder holder) {
+        if (mp == null) {
+            // implement a fallback mechanism if it fails, for example if no internet or 404
+            Log.w("Layout1", "MediaPlayer was not created");
+            return;
+        }
+        // 绑定mediaplayer 与 surfaceview
+        mp.setDisplay(holder);
+    }
+
+
+    @Override
+    public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
+        tryDrawing(holder);
+    }
+
+    private void tryDrawing(SurfaceHolder surfaceHolder) {
+        // get canvas from surface holder
+        Canvas canvas = surfaceHolder.lockCanvas();
+        if (canvas == null) {
+            ULog.d(TAG, "canvas is null");
+        } else {
+            canvas.drawColor(Color.RED);
+            surfaceHolder.unlockCanvasAndPost(canvas);
+        }
+    }
+
+
+    @Override
+    public void surfaceDestroyed(SurfaceHolder holder) {
+
+    }
 
     private class MyDragHelper extends ViewDragHelper.Callback{
 
@@ -156,8 +303,6 @@ public class YoutubeLayout2 extends RelativeLayout {
             else
                 smoothSlideTo(1f);
             Log.d("DragLayout", "--- "+mDragOffset+" --- released ");
-//            myDragerHelper.settleCapturedViewAt(releasedChild.getLeft(), top);
-//            myDragerHelper.settleCapturedViewAt()
         }
 
         /**

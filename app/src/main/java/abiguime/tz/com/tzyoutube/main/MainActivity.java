@@ -19,6 +19,7 @@ import android.graphics.ColorMatrixColorFilter;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.StateListDrawable;
+import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -43,6 +44,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.SurfaceHolder;
 import android.view.View;
 import android.view.Window;
 import android.widget.FrameLayout;
@@ -54,6 +56,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import abiguime.tz.com.tzyoutube.R;
+import abiguime.tz.com.tzyoutube._commons.core.YtbApplication;
 import abiguime.tz.com.tzyoutube._commons.customviews.YoutubeLayout;
 import abiguime.tz.com.tzyoutube._data.Video;
 import abiguime.tz.com.tzyoutube._data.source.remote.UserRemoteDataSource;
@@ -71,7 +74,8 @@ import abiguime.tz.com.tzyoutube.search.SearchActivity;
 public class MainActivity extends AppCompatActivity implements
         UserPageFragment.OnFragmentInteractionListener,
         HomePageFragment.OnFragmentInteractionListener,
-        HotPageFragment.OnFragmentInteractionListener {
+        HotPageFragment.OnFragmentInteractionListener
+{
 
     public static final long DURATION = 300;
     /* 内部所有fragment的presenter */
@@ -111,7 +115,6 @@ public class MainActivity extends AppCompatActivity implements
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
         // 初始化view
         initViews();
         initActionBar();
@@ -122,11 +125,25 @@ public class MainActivity extends AppCompatActivity implements
         initPresenter();
     }
 
+
     @Override
     protected void onPause() {
         super.onPause();
         // 1 - 如果用户突然退出本activity， 应该把当前的请求都停止。
         // 2 - 如果在播放视频，那么把视频也停止，并且释放资源
+        ((YtbApplication)getApplication()).release();
+    }
+
+    /* 当回到activity是，就获取到本数据 */
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+    }
+
+    /* 当退出activity时，可以把数据存到这里*/
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
     }
 
     @Override
@@ -134,6 +151,7 @@ public class MainActivity extends AppCompatActivity implements
         super.onResume();
         // 如果
     }
+
 
     private void initActionBar() {
         toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -292,6 +310,7 @@ public class MainActivity extends AppCompatActivity implements
 
 
         Intent in = new Intent(this, SearchActivity.class);
+        in.putExtra("isplaying", ((YtbApplication)getApplication()).getIsplaying());
         // pass the toolbar between activities
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -343,21 +362,10 @@ public class MainActivity extends AppCompatActivity implements
             ytb.requestHeaderContent();
         }
         ytb.setVideo(video, isFirst);
-
-       /* 如果是第一次播放，就从改视频的图片弹出我们的播放的布局*/
-     /*   if (isFirst && v != null) {
-            ObjectAnimator an = ObjectAnimator.ofFloat(ytb, View.TRANSLATION_Y, v.getY(), v.getY() -300);
-            an.addListener(new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    super.onAnimationEnd(animation);
-                }
-            });
-            an.setDuration(300);
-            an.start();
-            isFirst = false;
-        }*/
+        // play video inside the subview
     }
+
+
 
 
     class MainActivityPageAdapter extends FragmentPagerAdapter {

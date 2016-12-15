@@ -1,27 +1,59 @@
 package abiguime.tz.com.tzyoutube._commons.customviews;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.ObjectAnimator;
 import android.content.Context;
+import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
+import android.media.AudioManager;
+import android.media.MediaPlayer;
+import android.net.Uri;
+import android.os.Handler;
+import android.os.Message;
 import android.support.v4.view.MotionEventCompat;
 import android.support.v4.view.ViewCompat;
 import android.support.v4.widget.ViewDragHelper;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.MotionEvent;
+import android.view.SurfaceHolder;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.Toast;
+
+import com.squareup.picasso.Picasso;
 
 import abiguime.tz.com.tzyoutube.R;
+import abiguime.tz.com.tzyoutube._commons.core.YtbApplication;
+import abiguime.tz.com.tzyoutube._commons.utils.ULog;
 import abiguime.tz.com.tzyoutube._data.Video;
+import abiguime.tz.com.tzyoutube._data.constants.Constants;
+import abiguime.tz.com.tzyoutube.main.MainActivity;
 
 
 /**
  * Created by abiguime on 2016/8/4.
  */
 
-public class YoutubeLayout extends ViewGroup {
+public class YoutubeLayout extends ViewGroup implements
+// videos playback interfaces
+        SurfaceHolder.Callback,
+        MediaPlayer.OnCompletionListener,
+        MediaPlayer.OnBufferingUpdateListener ,
+        MediaPlayer.OnPreparedListener,
+        MediaPlayer.OnVideoSizeChangedListener,
+        MediaPlayer.OnSeekCompleteListener ,
+        MediaPlayer.OnInfoListener{
+
+    private static final String TAG = YoutubeLayout.class.getName();
+
+    // 进度
+    private static final int PROGRESS_UPDATE = 1112;
 
     private final ViewDragHelper myDragerHelper;
 
@@ -31,24 +63,46 @@ public class YoutubeLayout extends ViewGroup {
     private float initialMotionX, initialMotionY;
 
     /**
-     * distance on which we can drag the view
+     * 视图被滑动的距离 （上到下）
      */
     private int dragRange;
 
     /**
-     *
+     * 表示本view的top 或者 y 坐标
      */
     private int mTop;
 
     /**
-     *
+     * 表示从上到下滑动的比例：
+     * 上 ： 0f  --> 0%
+     * 下： 1f  ---》 100%
      */
     private float mDragOffset;
 
 
     private float SENSITIVITY = 1.0f;
 
+
     public boolean justStarted = true;
+
+
+    private MediaPlayer mp;
+    private Canvas canvas;
+
+    private int position = -1;
+
+    // 是否在播放
+    private boolean isPlaying = true;
+
+    // 暂停时候进度
+    private int current;
+
+    // 当前播放视频
+    private Video currentVideo;
+
+    // 跟着播放进的子线程
+    private PlayerProgressThread thread;
+
 
     public YoutubeLayout(Context context) {
         this(context, null);
@@ -112,10 +166,68 @@ public class YoutubeLayout extends ViewGroup {
 
     /*设置改播放的音乐*/
     public void setVideo(Video video, boolean isFirst) {
-        mHeaderView.setVideo(video);
+        // 设置视频的介绍图片（cover) （作为正在加载图）
+        setLoadingCover(video);
+        // 启动播放
+        startMediaPlayerPlayBack(video);
+        currentVideo = video;
         // 把显示视频的viewgroup 显示成全屏
         if (!isFirst)
             smoothSlideTo(0f);
+
+
+        if (mp!=null) {
+            mp.getCurrentPosition();
+        }
+        // 运行显现出、时时刻刻的获取进度.
+    }
+
+
+    private void startMediaPlayerPlayBack(Video video) {
+        // 因为不想在主线程做mediaplayer的初始化，在另外子线程实现mediaplayer
+        // 初始化再实现一下操作
+        ((YtbApplication) getContext().getApplicationContext())
+                .getMediaPlayerFor(Constants.IP + video.path, new YtbApplication.GetMediaPlayer() {
+                    @Override
+                    public void MediaPlayerLoaded(MediaPlayer mp, boolean isWorking) {
+                        if (!isWorking)  {
+                            if (mp != null) {
+                                mp.release();
+                                mp = null;
+                            }
+                            return;
+                        }
+                        YoutubeLayout.this.mp = mp;
+                        mp.setOnBufferingUpdateListener(YoutubeLayout.this); // 缓存更新监听
+                        mp.setOnCompletionListener(YoutubeLayout.this); // 播放完毕监听
+                        mp.setOnPreparedListener(YoutubeLayout.this); // 准备完成监听（prepareAsync）
+                        mp.setScreenOnWhilePlaying(true); // 在播放期间屏幕必须保持量的状态
+                        mp.setOnVideoSizeChangedListener(YoutubeLayout.this); // 在视频大小手变化时 (重新设置surfaceview 的大小)
+                        mp.setAudioStreamType(AudioManager.STREAM_MUSIC); // 设置音乐频道
+                        mHeaderView.getSv().getHolder().addCallback(YoutubeLayout.this); // 绑定surfaceview和mediaplayer
+                    }
+
+                    @Override
+                    public void MediaPlayerError() {
+                        ((MainActivity)getContext()).runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Toast.makeText(getContext(), "MediaPlayerError", Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                    }
+                });
+    }
+
+
+    /*设置视频主要图片*/
+    private void setLoadingCover(Video video) {
+        mHeaderView.getSv().setVisibility(INVISIBLE);
+        mHeaderView.getSv().getHolder().removeCallback(this);
+        Picasso.with(getContext()).load(Constants.IP + video.coverimage)
+                .placeholder(R.drawable.loading_black_cover)
+                .into(mHeaderView.getIv());
+        mHeaderView.getIv().setVisibility(VISIBLE);
     }
 
     public void requestHeaderContent() {
@@ -128,6 +240,119 @@ public class YoutubeLayout extends ViewGroup {
                 }
             }, 300);
         }
+    }
+
+    @Override
+    public void onBufferingUpdate(MediaPlayer mp, int percent) {
+        mHeaderView.setBufferUpdatePercent(percent);
+    }
+
+    @Override
+    public void onCompletion(MediaPlayer mp) {
+        mp.release();
+        mp = null;
+    }
+
+    /* 当prepareAsync 运行完成时，就会调用本方法*/
+    @Override
+    public void onPrepared(final MediaPlayer mp) {
+
+        if (mp == null) {
+            Toast.makeText(getContext(), "Mediaplayer null", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    // 启动视频播放;
+                    mHeaderView.setSvSize(mp.getVideoWidth(), mp.getVideoHeight());
+                    ULog.d("xxx", "vheight "+mp.getVideoHeight()+" -- vwidth "+mp.getVideoWidth());
+                    // 把进度放在目前播放到的位置
+                    mp.seekTo(current);
+                    //播放
+                    mp.start();
+                    if (thread == null) {
+                        thread = new PlayerProgressThread();
+                        thread.start();
+                    }
+                    current = 0; // 保持重播一次
+                } catch (IllegalStateException e) {
+                    e.printStackTrace();
+                }
+                ObjectAnimator anim = ObjectAnimator.ofFloat(mHeaderView.getIv(),
+                        View.ALPHA, 1f, 0f);
+                anim.setDuration(500/2);
+                anim.start();
+                anim.addListener(new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        super.onAnimationEnd(animation);
+                        mHeaderView.getIv().setVisibility(INVISIBLE);
+                        mHeaderView.getSv().setVisibility(VISIBLE);
+                    }
+                });
+            }
+        }, 1000);
+    }
+
+
+
+    @Override
+    public void onVideoSizeChanged(MediaPlayer mp, int width, int height) {
+    }
+
+    @Override
+    public void surfaceCreated(SurfaceHolder holder) {
+        Log.d("xxx", "surfaceCreated");
+        if (mp == null) {
+            // implement a fallback mechanism if it fails, for example if no internet or 404
+            Log.w("Layout1", "MediaPlayer was not created");
+            return;
+        }
+        // 绑定mediaplayer 与 surfaceview
+        try {
+            mp.setDisplay(holder);
+        } catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+
+    @Override
+    public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
+        Log.d("xxx", "surfaceChanged");
+        tryDrawing(holder);
+    }
+
+    private void tryDrawing(SurfaceHolder surfaceHolder) {
+        // get canvas from surface holder
+        if (!surfaceHolder.isCreating() || !surfaceHolder.getSurface().isValid())
+            return;
+        canvas = surfaceHolder.lockCanvas();
+        ULog.d(TAG, "lockCanvas");
+        if (canvas == null) {
+            ULog.d(TAG, "canvas is null");
+        } else {
+            canvas.drawColor(Color.BLACK);
+            surfaceHolder.unlockCanvasAndPost(canvas);
+            ULog.d(TAG, "unlockCanvasAndPost");
+        }
+    }
+
+
+    @Override
+    public void surfaceDestroyed(SurfaceHolder holder) {
+    }
+
+    @Override
+    public void onSeekComplete(MediaPlayer mp) {
+    }
+
+    @Override
+    public boolean onInfo(MediaPlayer mp, int what, int extra) {
+        return false;
     }
 
     private class MyDragHelper extends ViewDragHelper.Callback{
@@ -159,17 +384,10 @@ public class YoutubeLayout extends ViewGroup {
 
         @Override
         public void onViewReleased(View releasedChild, float xvel, float yvel) {
-            int top = getPaddingTop();
-           /* if (yvel > 0 || (yvel == 0 && mDragOffset > 0.5f)) {
-                top += dragRange;
-            }*/
             if (mDragOffset<0.5f)
                 smoothSlideTo(0f);
             else
                 smoothSlideTo(1f);
-            Log.d("DragLayout", "--- "+mDragOffset+" --- released ");
-//            myDragerHelper.settleCapturedViewAt(releasedChild.getLeft(), top);
-//            myDragerHelper.settleCapturedViewAt()
         }
 
         /**
@@ -184,12 +402,6 @@ public class YoutubeLayout extends ViewGroup {
             final int newTop = Math.min(Math.max(top, topBound), bottomBound);
             return newTop; /* sends back the new top of the view */
         }
-
-
-//        @Override
-//        public int getViewVerticalDragRange(View child) {
-//            return dragRange;
-//        }
     }
 
     private int getVideo16_9Height() {
@@ -245,20 +457,17 @@ public class YoutubeLayout extends ViewGroup {
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
+        // 把事件传给draghelper
         myDragerHelper.processTouchEvent(event);
-
         final int action = event.getAction();
+        // 获取手指位置
         float x = event.getX();
         float y = event.getY();
-
-        // check whether the view supplied is under the given point.
-        // as a draging action or what so ever...
+        // 判断用户点击的位置是否在具体视图一下
         boolean isHeaderViewUnder = myDragerHelper.isViewUnder(mHeaderView, (int)x, (int)y);
-
         switch (action & MotionEvent.ACTION_MASK) {
-
             case MotionEvent.ACTION_DOWN:
-                /* when use starts motion, get the starting the point */
+                /* 表示滑动操作开始了--》保存按下的第一个点 */
                 initialMotionX = x;
                 initialMotionY = y;
                 break;
@@ -268,6 +477,14 @@ public class YoutubeLayout extends ViewGroup {
                 final float dx = x - initialMotionX;
                 final float dy = y - initialMotionY;
                 final int slop = myDragerHelper.getTouchSlop();
+                /* 判断三个点：
+                    1- 用户点击的位置时候 Header 头部
+                    2-
+                 */
+                if (position == Gravity.TOP && isHeaderViewUnder && isHeaderTop()) {
+                    processClick();
+                    return true;
+                }
                 if (dx * dx + dy * dy < slop * slop && isHeaderViewUnder) {
                     if (mDragOffset == 0) {
                         smoothSlideTo(1f);
@@ -282,9 +499,38 @@ public class YoutubeLayout extends ViewGroup {
                 isViewHit(mDescView, (int) x, (int) y);
     }
 
+    private boolean isHeaderTop() {
+        return mHeaderView.getX() <= 1.0f && mHeaderView.getY() <= 1.0f;
+    }
 
-    /*check if the view is still entieryshowing on the screen.
-    * return true if yes. */
+    /*按照现在视频播放状态暂停或者播放*/
+    private void processClick() {
+        if (mp == null) {
+            Toast.makeText(getContext(), "processClick", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        try {
+            if (mp != null && mp.isPlaying()) {
+                mHeaderView.playpauseAnimation(false);
+                current = mp.getCurrentPosition();
+                mp.pause();
+                mp.release();
+                mp = null;
+                isPlaying = false;
+            } else {
+                mHeaderView.playpauseAnimation(true);
+                if (currentVideo != null)
+                    startMediaPlayerPlayBack(currentVideo);
+            }
+        }catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+
+
+
+    /*判断view有没有出去屏幕能够显示的方位 */
     private boolean isViewHit(View view, int x, int y) {
         int[] viewLocation = new int[2];
         view.getLocationOnScreen(viewLocation); // get the actual position onscreen of the view.
@@ -297,15 +543,17 @@ public class YoutubeLayout extends ViewGroup {
     }
 
 
+    /* 自动把视图通过选快点额效果滑到底部 */
     public boolean smoothSlideTo(float slideOffset) {
+
+        if (slideOffset == .0f)
+            position = Gravity.TOP;
+        else
+            position = Gravity.BOTTOM;
 
         final int topBound = getPaddingTop();
         int y = (int) (topBound + slideOffset * dragRange);
         int x = mHeaderView.getLeft();
-        /*if (slideOffset == 1) {
-            y -= getContext().getResources().getDimensionPixelSize(R.dimen.item_margin_bottom);
-            x -= getContext().getResources().getDimensionPixelSize(R.dimen.item_margin_margin);
-        }*/
         if (myDragerHelper.smoothSlideViewTo(mHeaderView, x, y)) {
             ViewCompat.postInvalidateOnAnimation(this);
             return true;
@@ -313,11 +561,40 @@ public class YoutubeLayout extends ViewGroup {
         return false;
     }
 
-    public View getmDescView() {
-        return mDescView;
-    }
 
-    public MyRelativeLayout getmHeaderView() {
-        return mHeaderView;
+    Handler mHandler = new Handler(new Handler.Callback() {
+        @Override
+        public boolean handleMessage(Message msg) {
+            switch (msg.what) {
+                case PROGRESS_UPDATE:
+                    int totalProgress = msg.arg1;
+                    int progress = msg.arg2;
+                    mHeaderView.setProgress(progress, totalProgress);
+                    break;
+            }
+            return false;
+        }
+    });
+
+    class PlayerProgressThread extends Thread  {
+        @Override
+        public void run() {
+            super.run();
+            while (isPlaying) {
+                try {
+                    Thread.sleep(800);
+                    if (mp.isPlaying()) {
+                        Message msg = mHandler.obtainMessage();
+                        msg.arg1 = mp.getDuration();
+                        msg.arg2 = mp.getCurrentPosition();
+                        msg.what = PROGRESS_UPDATE;
+                        mHandler.sendMessage(msg);
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    isPlaying = true;
+                }
+            }
+        }
     }
 }

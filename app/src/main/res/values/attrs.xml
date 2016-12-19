@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <declare-styleable name="youtube_layout">
+        <attr name="init_draw_position" format="integer">
+            <enum name="full" value="0"/>
+            <enum name="minimized" value="1"/>
+        </attr>
+        <attr name="init_visibility" format="integer">
+            <enum name="visible" value="0"/>
+            <enum name="invisible" value="1"/>
+        </attr>
+    </declare-styleable>
+
+</resources>

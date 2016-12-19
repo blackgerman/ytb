@@ -48,16 +48,16 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"/>
     </android.support.design.widget.CoordinatorLayout>
-    <abiguime.tz.com.tzyoutube._commons.customviews.YoutubeLayout2
+  <!--  <abiguime.tz.com.tzyoutube._commons.customviews.YoutubeLayout2
         android:layout_width="match_parent"
         android:orientation="vertical"
         android:background="@android:color/transparent"
         android:id="@+id/youtubelayout"
         android:layout_height="match_parent">
-        <!--Videoview container
+        &lt;!&ndash;Videoview container
                 - must be transparent, but able to contain a video view
                 - able to send all the events to his backviews
-                - but if the event is on the videoview, just give it to him -->
+                - but if the event is on the videoview, just give it to him &ndash;&gt;
         <abiguime.tz.com.tzyoutube._commons.customviews.MyRelativeLayout2
             android:background="@android:color/transparent"
             android:id="@+id/viewHeader"
@@ -98,5 +98,5 @@
             android:background="#d658d6"
             android:orientation="vertical">
         </LinearLayout>
-    </abiguime.tz.com.tzyoutube._commons.customviews.YoutubeLayout2>
+    </abiguime.tz.com.tzyoutube._commons.customviews.YoutubeLayout2>-->
 </FrameLayout>

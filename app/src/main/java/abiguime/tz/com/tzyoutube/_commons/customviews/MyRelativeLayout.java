@@ -46,6 +46,7 @@ public class MyRelativeLayout extends LinearLayout {
 
     private CustomSeekbar myseekbar;
 
+
     public MyRelativeLayout(Context context) {
         this(context, null);
     }

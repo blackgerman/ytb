@@ -4,6 +4,7 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
@@ -16,6 +17,7 @@ import android.os.Message;
 import android.support.v4.view.MotionEventCompat;
 import android.support.v4.view.ViewCompat;
 import android.support.v4.widget.ViewDragHelper;
+import android.transition.Visibility;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.Gravity;
@@ -34,6 +36,7 @@ import abiguime.tz.com.tzyoutube._commons.utils.ULog;
 import abiguime.tz.com.tzyoutube._data.Video;
 import abiguime.tz.com.tzyoutube._data.constants.Constants;
 import abiguime.tz.com.tzyoutube.main.MainActivity;
+import abiguime.tz.com.tzyoutube.main.fragment_home.HomePageContract;
 
 
 /**
@@ -51,6 +54,11 @@ public class YoutubeLayout extends ViewGroup implements
         MediaPlayer.OnInfoListener{
 
     private static final String TAG = YoutubeLayout.class.getName();
+
+    /* 表示当前缩放大小状态 （是否缩小到下面）*/
+    public enum SizeState {
+        Minimized, Full;
+    }
 
     // 进度
     private static final int PROGRESS_UPDATE = 1112;
@@ -78,18 +86,19 @@ public class YoutubeLayout extends ViewGroup implements
      * 下： 1f  ---》 100%
      */
     private float mDragOffset;
-
-
+    /*敏感度*/
     private float SENSITIVITY = 1.0f;
-
-
+    /*刚初始化，还没任何操作*/
     public boolean justStarted = true;
 
-
     private MediaPlayer mp;
+
     private Canvas canvas;
 
-    private int position = -1;
+    // 缩放状态
+    private SizeState position;
+    private int visibility;
+
 
     // 是否在播放
     private boolean isPlaying = true;
@@ -97,16 +106,19 @@ public class YoutubeLayout extends ViewGroup implements
     // 暂停时候进度
     private int current;
 
+
     // 当前播放视频
     private Video currentVideo;
 
     // 跟着播放进的子线程
     private PlayerProgressThread thread;
+    private SurfaceHolder mSurfaceHolder;
 
 
     public YoutubeLayout(Context context) {
         this(context, null);
     }
+
 
     public YoutubeLayout(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
@@ -115,6 +127,20 @@ public class YoutubeLayout extends ViewGroup implements
     public YoutubeLayout(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         myDragerHelper = ViewDragHelper.create(this, SENSITIVITY, new MyDragHelper());
+        /* custom attributes are
+        * - show bottom / show top
+        * - visibility : visible, invisible
+        * */
+        if (attrs != null) {
+            TypedArray attributes = context.obtainStyledAttributes(attrs,
+                    new int[]{R.styleable.youtube_layout_init_draw_position,
+                            R.styleable.youtube_layout_init_visibility});
+            position = (attributes.getInt(0, 0) != 0 ? SizeState.Full : SizeState.Minimized);
+            visibility = (attributes.getInt(1, 0) == 0 ? View.VISIBLE : View.INVISIBLE);
+        } else {
+            position = SizeState.Full;
+            visibility = View.VISIBLE;
+        }
     }
 
 
@@ -123,7 +149,13 @@ public class YoutubeLayout extends ViewGroup implements
         super.onFinishInflate();
         mDescView = findViewById(R.id.viewDesc);
         mHeaderView = (MyRelativeLayout) findViewById(R.id.viewHeader);
-        // force the iamgeview to redraw
+
+        // 根据状态设计显示性
+        if (position == SizeState.Minimized) {
+            mDescView.setVisibility(INVISIBLE);
+            mHeaderView.setVisibility(VISIBLE);
+        }
+        setVisibility(visibility);
     }
 
     /* OnLayout is need to tell a view how is he going to draw
@@ -132,24 +164,37 @@ public class YoutubeLayout extends ViewGroup implements
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
 
-        dragRange = getHeight() - mHeaderView.getHeight();
+        dragRange = getScreenHeight() - mHeaderView.getHeight();
         // remove margin bottom
         dragRange -= getContext().getResources().getDimensionPixelSize(R.dimen.item_margin_bottom);
         /*positions of the top and bottom views have to be computed
         * programmatically
         * */
-        if (justStarted) {
-            justStarted = false;
-            mTop = getHeight() -
-                    getVideo16_9Height() -
-                    getContext().getResources().getDimensionPixelSize(R.dimen.item_margin_bottom);;
-            mHeaderView.setPivotY(getVideo16_9Height());
-            mHeaderView.setScaleY(1/3);
+
+        if (justStarted && position == SizeState.Minimized) {
+//            justStarted = false;
+            mTop = getScreenHeight() -
+                    getVideo16_9Height()/3 -
+                    getContext().getResources().getDimensionPixelSize(R.dimen.item_margin_bottom);
+            int  mBottom = mTop + getVideo16_9Height()/3;
+            int mLeft = getScreenWidth() - getVideo16_9Height()/3 - getContext()
+                    .getResources().getDimensionPixelSize(R.dimen.item_margin_bottom);
+            int mRight = mLeft + getVideo16_9Height()/3;
+            mHeaderView.layout(mLeft, mTop, mRight, mBottom);
+            Log.d("xxx", ""+mLeft+" - "+mTop+" - "+mRight+" - "+mBottom);
+            Log.d("xxx", "getVideo16_9Height/3 = "+(getVideo16_9Height()/3));
+        } else{
+            mHeaderView.layout(0, mTop, r, mTop+mHeaderView.getMeasuredHeight());
         }
-        // initial positions.
-        mHeaderView.layout(0, mTop, r, mTop+mHeaderView.getMeasuredHeight());
-        mDescView.layout(0,mTop+mHeaderView.getMeasuredHeight(), r, b+mTop)
-        ;
+        mDescView.layout(0,mTop+mHeaderView.getMeasuredHeight(), r, b+mTop);
+    }
+
+    private int getScreenHeight() {
+        return getContext().getResources().getDisplayMetrics().heightPixels;
+    }
+
+    private int getScreenWidth() {
+        return getContext().getResources().getDisplayMetrics().widthPixels;
     }
 
 
@@ -305,6 +350,7 @@ public class YoutubeLayout extends ViewGroup implements
 
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
+        mSurfaceHolder = holder;
         Log.d("xxx", "surfaceCreated");
         if (mp == null) {
             // implement a fallback mechanism if it fails, for example if no internet or 404
@@ -323,20 +369,20 @@ public class YoutubeLayout extends ViewGroup implements
     @Override
     public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
         Log.d("xxx", "surfaceChanged");
-        tryDrawing(holder);
+        tryDrawing();
     }
 
-    private void tryDrawing(SurfaceHolder surfaceHolder) {
+    private void tryDrawing() {
         // get canvas from surface holder
-        if (!surfaceHolder.isCreating() || !surfaceHolder.getSurface().isValid())
+        if (!mSurfaceHolder.isCreating() || !mSurfaceHolder.getSurface().isValid())
             return;
-        canvas = surfaceHolder.lockCanvas();
+        canvas = mSurfaceHolder.lockCanvas();
         ULog.d(TAG, "lockCanvas");
         if (canvas == null) {
             ULog.d(TAG, "canvas is null");
         } else {
             canvas.drawColor(Color.BLACK);
-            surfaceHolder.unlockCanvasAndPost(canvas);
+            mSurfaceHolder.unlockCanvasAndPost(canvas);
             ULog.d(TAG, "unlockCanvasAndPost");
         }
     }
@@ -344,6 +390,7 @@ public class YoutubeLayout extends ViewGroup implements
 
     @Override
     public void surfaceDestroyed(SurfaceHolder holder) {
+        mSurfaceHolder = null;
     }
 
     @Override
@@ -398,7 +445,7 @@ public class YoutubeLayout extends ViewGroup implements
         public int clampViewPositionVertical(View child, int top, int dy) {
 
             final int topBound = getPaddingTop();
-            final int bottomBound = getHeight() - mHeaderView.getHeight();
+            final int bottomBound = getScreenHeight() - mHeaderView.getHeight();
             final int newTop = Math.min(Math.max(top, topBound), bottomBound);
             return newTop; /* sends back the new top of the view */
         }
@@ -481,7 +528,7 @@ public class YoutubeLayout extends ViewGroup implements
                     1- 用户点击的位置时候 Header 头部
                     2-
                  */
-                if (position == Gravity.TOP && isHeaderViewUnder && isHeaderTop()) {
+                if (position == SizeState.Full && isHeaderViewUnder && isHeaderTop()) {
                     processClick();
                     return true;
                 }
@@ -547,9 +594,9 @@ public class YoutubeLayout extends ViewGroup implements
     public boolean smoothSlideTo(float slideOffset) {
 
         if (slideOffset == .0f)
-            position = Gravity.TOP;
+            position = SizeState.Full;
         else
-            position = Gravity.BOTTOM;
+            position = SizeState.Minimized;
 
         final int topBound = getPaddingTop();
         int y = (int) (topBound + slideOffset * dragRange);

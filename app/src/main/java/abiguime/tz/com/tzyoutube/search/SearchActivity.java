@@ -11,21 +11,15 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.transition.Fade;
-import android.util.Log;
 import android.view.Menu;
 import android.view.View;
-import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
 import java.util.List;
 
 import abiguime.tz.com.tzyoutube.R;
-import abiguime.tz.com.tzyoutube._commons.customviews.YoutubeLayout;
-import abiguime.tz.com.tzyoutube._commons.customviews.YoutubeLayout2;
-import abiguime.tz.com.tzyoutube._data.HistoricalItem;
 import abiguime.tz.com.tzyoutube._data.Video;
-import abiguime.tz.com.tzyoutube._data.constants.Constants;
 import abiguime.tz.com.tzyoutube._data.source.VideoDataSource;
 import abiguime.tz.com.tzyoutube._data.source.local.HistoricalItemDataSource;
 import abiguime.tz.com.tzyoutube._data.source.remote.VideoRemoteDataSource;
@@ -66,7 +60,7 @@ public class SearchActivity extends AppCompatActivity implements
     /* 是否在退出activity */
     private boolean exiting = false;
     private boolean isQuering = false;
-    private YoutubeLayout2 ytb;
+//    private YoutubeLayout2 ytb;
 
 
     @Override
@@ -118,7 +112,7 @@ public class SearchActivity extends AppCompatActivity implements
 
     private void initMediaPlayer() {
         if (getIntent().getBooleanExtra("isplaying", false)) {
-            ytb.continueVideo(false);
+//            ytb.continueVideo(false);
         }
     }
 
@@ -126,9 +120,9 @@ public class SearchActivity extends AppCompatActivity implements
     private boolean isFirst = true;
 
     private void initYoutubeLayout() {
-        if (ytb != null && ytb.getVisibility() != View.VISIBLE) {
-            ytb.setVisibility(View.VISIBLE);
-        }
+//        if (ytb != null && ytb.getVisibility() != View.VISIBLE) {
+//            ytb.setVisibility(View.VISIBLE);
+//        }
     }
 
     private void initRepo() {
@@ -155,7 +149,7 @@ public class SearchActivity extends AppCompatActivity implements
     private void initViews() {
         tb = (Toolbar) findViewById(R.id.toolbar);
         searchView = (SearchView) findViewById(R.id.mysearchview);
-        ytb= (YoutubeLayout2) findViewById(R.id.youtubelayout);
+//        ytb= (YoutubeLayout2) findViewById(R.id.youtubelayout);
     }
 
     @Override
@@ -175,10 +169,10 @@ public class SearchActivity extends AppCompatActivity implements
 
     public void playVideo(Video video, View v) {
         Toast.makeText(this, "Play "+video.toString(), Toast.LENGTH_SHORT).show();
-        if (ytb != null && ytb.getVisibility() != View.VISIBLE) {
-            ytb.setVisibility(View.VISIBLE);
-        }
-        ytb.setVideo(video, isFirst);
+//        if (ytb != null && ytb.getVisibility() != View.VISIBLE) {
+//            ytb.setVisibility(View.VISIBLE);
+//        }
+//        ytb.setVideo(video, isFirst);
         // play video inside the subview
     }
 

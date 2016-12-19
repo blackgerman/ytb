@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<abiguime.tz.com.tzyoutube._commons.customviews.YoutubeLayout android:layout_width="match_parent"
+    xmlns:custom="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:visibility="visible"
+    android:background="@android:color/black"
+    android:id="@+id/youtubelayout"
+    android:layout_height="match_parent"
+    custom:init_draw_position="minimized"
+    custom:init_visibility="visible"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+    <!--Videoview container
+            - must be transparent, but able to contain a video view
+            - able to send all the events to his backviews
+            - but if the event is on the videoview, just give it to him -->
+    <abiguime.tz.com.tzyoutube._commons.customviews.MyRelativeLayout
+        android:background="@android:color/transparent"
+        android:id="@+id/viewHeader"
+        android:layout_width="match_parent"
+        android:layout_height="200dp">
+        <FrameLayout
+            android:fitsSystemWindows="true"
+            android:background="@android:color/black"
+            android:layout_gravity="right"
+            android:id="@+id/frame_playback"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+            <!-- 显示视频的view-->
+            <SurfaceView
+                android:layout_gravity="right"
+                android:id="@+id/sv_videoclub"
+                android:layout_width="0dp"
+                android:visibility="invisible"
+                android:layout_height="0dp"/>
+            <!-- 显示视频的介绍图片的view-->
+            <ImageView
+                android:id="@+id/iv_videoclub"
+                android:visibility="visible"
+                android:layout_gravity="right"
+                android:scaleType="centerCrop"
+                android:background="@drawable/loading_black_cover"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"/>
+            <!-- 显示播放与暂停动画的imageview -->
+            <ImageView
+                android:id="@+id/iv_play_pause"
+                android:src="@drawable/pause_drawable"
+                android:background="@drawable/play_pause_cercle_background"
+                android:layout_gravity="center"
+                android:visibility="invisible"
+                android:layout_width="50dp"
+                android:layout_height="50dp" />
+            <abiguime.tz.com.tzyoutube._commons.customviews.CustomSeekbar
+                android:id="@+id/myseekbar"
+                android:layout_width="match_parent"
+                android:thumb="@drawable/progressthumb"
+                android:progressDrawable="@drawable/playback_custom_progress_drawable"
+                android:layout_gravity="bottom"
+                android:layout_height="@dimen/thumbHeight" />
+        </FrameLayout>
+    </abiguime.tz.com.tzyoutube._commons.customviews.MyRelativeLayout>
+    <LinearLayout
+        android:id="@+id/viewDesc"
+        android:tag="desc"
+        android:textSize="35sp"
+        android:gravity="center"
+        android:text="Loreum Loreum"
+        android:textColor="@android:color/white"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#d658d6"
+        android:orientation="vertical">
+    </LinearLayout>
+</abiguime.tz.com.tzyoutube._commons.customviews.YoutubeLayout>

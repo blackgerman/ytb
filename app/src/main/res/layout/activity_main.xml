@@ -46,7 +46,14 @@
 
     </android.support.design.widget.CoordinatorLayout>
 
-
+    <fragment
+        android:id="@+id/player_fragment"
+        android:tag="PlayerFragment"
+        class="abiguime.tz.com.tzyoutube.main.fragment_player.PlayerFragment"
+        android:name="abiguime.tz.com.tzyoutube.main.fragment_player.PlayerFragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+<!--
     <abiguime.tz.com.tzyoutube._commons.customviews.YoutubeLayout
         android:layout_width="match_parent"
         android:orientation="vertical"
@@ -55,10 +62,10 @@
         android:id="@+id/youtubelayout"
 
         android:layout_height="match_parent">
-        <!--Videoview container
+        &lt;!&ndash;Videoview container
                 - must be transparent, but able to contain a video view
                 - able to send all the events to his backviews
-                - but if the event is on the videoview, just give it to him -->
+                - but if the event is on the videoview, just give it to him &ndash;&gt;
         <abiguime.tz.com.tzyoutube._commons.customviews.MyRelativeLayout
             android:background="@android:color/transparent"
             android:id="@+id/viewHeader"
@@ -71,14 +78,14 @@
                 android:id="@+id/frame_playback"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
-                <!-- 显示视频的view-->
+                &lt;!&ndash; 显示视频的view&ndash;&gt;
                 <SurfaceView
                     android:layout_gravity="right"
                     android:id="@+id/sv_videoclub"
                     android:layout_width="0dp"
                     android:visibility="invisible"
                     android:layout_height="0dp"/>
-                <!-- 显示视频的介绍图片的view-->
+                &lt;!&ndash; 显示视频的介绍图片的view&ndash;&gt;
                 <ImageView
                     android:id="@+id/iv_videoclub"
                     android:visibility="visible"
@@ -87,7 +94,7 @@
                     android:background="@drawable/loading_black_cover"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"/>
-                <!-- 显示播放与暂停动画的imageview -->
+                &lt;!&ndash; 显示播放与暂停动画的imageview &ndash;&gt;
                 <ImageView
                     android:id="@+id/iv_play_pause"
                     android:src="@drawable/pause_drawable"
@@ -117,5 +124,5 @@
             android:background="#d658d6"
             android:orientation="vertical">
         </LinearLayout>
-    </abiguime.tz.com.tzyoutube._commons.customviews.YoutubeLayout>
+    </abiguime.tz.com.tzyoutube._commons.customviews.YoutubeLayout>-->
 </FrameLayout>

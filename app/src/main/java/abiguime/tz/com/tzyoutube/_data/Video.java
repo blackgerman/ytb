@@ -122,4 +122,21 @@ public class Video implements Parcelable {
         return vs;
     }
 
+    @Override
+    public String toString() {
+        return "Video{" +
+                "id=" + id +
+                ", path='" + path + '\'' +
+                ", uploadTime=" + uploadTime +
+                ", likes=" + likes +
+                ", dislikes=" + dislikes +
+                ", duration=" + duration +
+                ", description='" + description + '\'' +
+                ", category=" + category +
+                ", user='" + user + '\'' +
+                ", title='" + title + '\'' +
+                ", coverimage='" + coverimage + '\'' +
+                ", channel='" + channel + '\'' +
+                '}';
+    }
 }

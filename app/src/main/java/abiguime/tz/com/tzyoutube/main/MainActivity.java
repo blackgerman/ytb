@@ -30,6 +30,7 @@ import android.support.v4.app.ActivityManagerCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.pm.ActivityInfoCompat;
 import android.support.v4.view.MenuItemCompat;
@@ -65,6 +66,7 @@ import abiguime.tz.com.tzyoutube.main.fragment_home.HomePageContract;
 import abiguime.tz.com.tzyoutube.main.fragment_home.HomePageFragment;
 import abiguime.tz.com.tzyoutube.main.fragment_home.HomePagePresenter;
 import abiguime.tz.com.tzyoutube.main.fragment_hot.HotPageFragment;
+import abiguime.tz.com.tzyoutube.main.fragment_player.PlayerFragment;
 import abiguime.tz.com.tzyoutube.main.fragment_user.UserPageContract;
 import abiguime.tz.com.tzyoutube.main.fragment_user.UserPageFragment;
 import abiguime.tz.com.tzyoutube.main.fragment_user.UserPagePresenter;
@@ -89,11 +91,6 @@ public class MainActivity extends AppCompatActivity implements
     /* views*/
     FrameLayout activity_frame;
 
-    //frames
-   /* UserPageFragment frg_user;
-    HomePageFragment frg_home;
-    HotPageFragment frg_hot;*/
-
     Map<Integer, WeakReference<Fragment>> frg;
 
     ViewPager vp;
@@ -102,13 +99,12 @@ public class MainActivity extends AppCompatActivity implements
     AppBarLayout appbar;
     Toolbar toolbar;
 
-
     // YoutubeLayout
-    YoutubeLayout ytb;
+//    YoutubeLayout ytb;
 
 
     private MainActivityPageAdapter vpadapter;
-
+    private PlayerFragment playerFragment;
 
 
     @Override
@@ -273,8 +269,12 @@ public class MainActivity extends AppCompatActivity implements
         vp = (ViewPager) findViewById(R.id.vpcontainer);
         tabs = (TabLayout) findViewById(R.id.tabs);
         appbar = (AppBarLayout) findViewById(R.id.appbar);
-        ytb = (YoutubeLayout) findViewById(R.id.youtubelayout);
+
+        // hide fragment
+        playerFragment = (PlayerFragment) getSupportFragmentManager().findFragmentById(R.id.player_fragment);
+//        getSupportFragmentManager().beginTransaction().hide(playerFragment).commit();
     }
+
 
     private void initPresenter() {
     }
@@ -354,18 +354,15 @@ public class MainActivity extends AppCompatActivity implements
     boolean isFirst = false;
 
 
+
     @Override
     public void playVideo(Video video, View v) {
         Toast.makeText(this, "Play "+video.toString(), Toast.LENGTH_SHORT).show();
-        if (ytb != null && ytb.getVisibility() != View.VISIBLE) {
-            ytb.setVisibility(View.VISIBLE);
-            ytb.requestHeaderContent();
+        if (playerFragment.isHidden()) {
+            getSupportFragmentManager().beginTransaction().show(playerFragment).commit();
         }
-        ytb.setVideo(video, isFirst);
-        // play video inside the subview
+        playerFragment.playVideo(video);
     }
-
-
 
 
     class MainActivityPageAdapter extends FragmentPagerAdapter {

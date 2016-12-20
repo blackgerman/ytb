@@ -5,11 +5,13 @@ import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.BaseColumns;
+import android.support.design.widget.AppBarLayout;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.SimpleCursorAdapter;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
+import android.transition.Explode;
 import android.transition.Fade;
 import android.view.Menu;
 import android.view.View;
@@ -28,6 +30,8 @@ import abiguime.tz.com.tzyoutube.search.fragment_search_history.SearchHistoryIte
 import abiguime.tz.com.tzyoutube.search.fragment_search_history.SearchPageHistoricPresenter;
 import abiguime.tz.com.tzyoutube.search.fragment_search_result.SearchResultItemFragment;
 import abiguime.tz.com.tzyoutube.search.fragment_search_result.SearchResultPresenter;
+
+import static abiguime.tz.com.tzyoutube.main.MainActivity.DURATION;
 
 public class SearchActivity extends AppCompatActivity implements
         SearchResultItemFragment.OnListFragmentInteractionListener,
@@ -56,6 +60,8 @@ public class SearchActivity extends AppCompatActivity implements
     private SearchResultPresenter searchResultPresenter;
     private VideoRemoteDataSource videoRepo;
 
+    //Appbar layout
+    AppBarLayout appBarLayout;
 
     /* 是否在退出activity */
     private boolean exiting = false;
@@ -68,8 +74,12 @@ public class SearchActivity extends AppCompatActivity implements
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_search);
 
+        if (false)
+            return;
         initViews();
         setSupportActionBar(tb);
+
+        appBarLayout.setLayerType(View.LAYER_TYPE_HARDWARE, null);
 
         // searchview 默认已经打开而且可以直接输入内容
         searchView.setIconified(false);
@@ -96,9 +106,10 @@ public class SearchActivity extends AppCompatActivity implements
 
         // material design activity 共享视图
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            Fade fade = new Fade();
-            fade.setDuration(MainActivity.DURATION);
-            getWindow().setEnterTransition(fade);
+            Explode explode = new Explode();
+            explode.setDuration(DURATION);
+            getWindow().setExitTransition(explode);
+            getWindow().setEnterTransition(explode);
         }
 
         // retrieve the data from the database and save put it in the fragment
@@ -117,7 +128,6 @@ public class SearchActivity extends AppCompatActivity implements
     }
 
 
-    private boolean isFirst = true;
 
     private void initYoutubeLayout() {
 //        if (ytb != null && ytb.getVisibility() != View.VISIBLE) {
@@ -149,6 +159,7 @@ public class SearchActivity extends AppCompatActivity implements
     private void initViews() {
         tb = (Toolbar) findViewById(R.id.toolbar);
         searchView = (SearchView) findViewById(R.id.mysearchview);
+        appBarLayout = (AppBarLayout) findViewById(R.id.appbar);
 //        ytb= (YoutubeLayout2) findViewById(R.id.youtubelayout);
     }
 
@@ -239,6 +250,18 @@ public class SearchActivity extends AppCompatActivity implements
     public void onVideoResultSelected(Video video) {
         // play video sent by the fragment
     }
+
+   /* @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+        if (hasFocus) {
+            getWindow().getDecorView().setSystemUiVisibility(
+                    View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                            | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                            | View.SYSTEM_UI_FLAG_FULLSCREEN
+                            | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);}
+    }*/
+
 
     @Override
     public void onFocusChange(View v, boolean hasFocus) {

@@ -39,6 +39,7 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
+import android.transition.Explode;
 import android.transition.Fade;
 import android.transition.Visibility;
 import android.util.Log;
@@ -309,26 +310,29 @@ public class MainActivity extends AppCompatActivity implements
     private void jumpToSearch() {
 
 
+
         Intent in = new Intent(this, SearchActivity.class);
         in.putExtra("isplaying", ((YtbApplication)getApplication()).getIsplaying());
         // pass the toolbar between activities
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-
-            Fade fade = new Fade();
-            fade.setDuration(DURATION);
-            fade.setMode(Visibility.MODE_OUT);
-            getWindow().setExitTransition(fade);
-//            getWindow().setReenterTransition(fade);
+            Fade explode = new Fade();
+            explode.setDuration(DURATION);
+            getWindow().setExitTransition(explode);
+            getWindow().setReenterTransition(explode);
             ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation(this,
                     appbar, "trans_to_search");
             // put the items to transfer
-            ActivityCompat.startActivity(this, in, options.toBundle());
+//            ActivityCompat.startActivity(this, in, options.toBundle());
+            appbar.setLayerType(View.LAYER_TYPE_HARDWARE, null);
+        startActivity(in, options.toBundle());
         } else {
             startActivity(in);
             overridePendingTransition(0, 0);
         }
     }
+
+
 
     private void goSearch() {
     }

@@ -17,6 +17,8 @@
 
     <color name="transparentcolorPrimary">#88e62019</color>
    <color name="buffering_gray">#995a5d5a</color>
+    <color name="blue">#1573a9</color>
+    <color name="transparent_black">#33000000</color>
 
 
 </resources>

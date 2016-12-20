@@ -11,21 +11,17 @@ import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
-import android.net.Uri;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v4.view.MotionEventCompat;
 import android.support.v4.view.ViewCompat;
 import android.support.v4.widget.ViewDragHelper;
-import android.transition.Visibility;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.squareup.picasso.Picasso;
@@ -36,7 +32,6 @@ import abiguime.tz.com.tzyoutube._commons.utils.ULog;
 import abiguime.tz.com.tzyoutube._data.Video;
 import abiguime.tz.com.tzyoutube._data.constants.Constants;
 import abiguime.tz.com.tzyoutube.main.MainActivity;
-import abiguime.tz.com.tzyoutube.main.fragment_home.HomePageContract;
 
 
 /**
@@ -133,10 +128,11 @@ public class YoutubeLayout extends ViewGroup implements
         * */
         if (attrs != null) {
             TypedArray attributes = context.obtainStyledAttributes(attrs,
-                    new int[]{R.styleable.youtube_layout_init_draw_position,
-                            R.styleable.youtube_layout_init_visibility});
-            position = (attributes.getInt(0, 0) != 0 ? SizeState.Full : SizeState.Minimized);
+                    new int[]{R.attr.init_draw_position,
+                            R.attr.init_visibility});
+            position = (attributes.getInt(0, 0) == 0 ? SizeState.Full : SizeState.Minimized);
             visibility = (attributes.getInt(1, 0) == 0 ? View.VISIBLE : View.INVISIBLE);
+       attributes.recycle();
         } else {
             position = SizeState.Full;
             visibility = View.VISIBLE;
@@ -152,11 +148,17 @@ public class YoutubeLayout extends ViewGroup implements
 
         // 根据状态设计显示性
         if (position == SizeState.Minimized) {
-            mDescView.setVisibility(INVISIBLE);
+            mDescView.setAlpha(0);
             mHeaderView.setVisibility(VISIBLE);
+            mDragOffset = 1.0f;
+        } else {
+            mHeaderView.setVisibility(VISIBLE);
+            mDescView.setVisibility(VISIBLE);
+            mDragOffset = 0.f;
         }
         setVisibility(visibility);
     }
+
 
     /* OnLayout is need to tell a view how is he going to draw
         *  himself
@@ -167,30 +169,43 @@ public class YoutubeLayout extends ViewGroup implements
         dragRange = getScreenHeight() - mHeaderView.getHeight();
         // remove margin bottom
         dragRange -= getContext().getResources().getDimensionPixelSize(R.dimen.item_margin_bottom);
-        /*positions of the top and bottom views have to be computed
-        * programmatically
-        * */
-
+        /* 初始化的位置 */
         if (justStarted && position == SizeState.Minimized) {
-//            justStarted = false;
-            mTop = getScreenHeight() -
-                    getVideo16_9Height()/3 -
-                    getContext().getResources().getDimensionPixelSize(R.dimen.item_margin_bottom);
-            int  mBottom = mTop + getVideo16_9Height()/3;
-            int mLeft = getScreenWidth() - getVideo16_9Height()/3 - getContext()
-                    .getResources().getDimensionPixelSize(R.dimen.item_margin_bottom);
-            int mRight = mLeft + getVideo16_9Height()/3;
+            mTop = getScreenHeight() - getVideo16_9Height()
+                    - getContext().getResources().getDimensionPixelSize(R.dimen.item_margin_bottom);
+            int mBottom = mTop + getVideo16_9Height();
+            int mLeft = 0;
+            int mRight = mLeft + getScreenWidth();
             mHeaderView.layout(mLeft, mTop, mRight, mBottom);
-            Log.d("xxx", ""+mLeft+" - "+mTop+" - "+mRight+" - "+mBottom);
-            Log.d("xxx", "getVideo16_9Height/3 = "+(getVideo16_9Height()/3));
-        } else{
+            mHeaderView.setIsInitial(true, position);
+        } else if (justStarted && position == SizeState.Full) {
+            mTop = 0;
+            int mBottom = mTop + getVideo16_9Height();
+            int  mLeft = 0;
+            int mRight = mLeft + getScreenWidth();
+            mHeaderView.layout(mLeft, mTop, mRight, mBottom);
+            mHeaderView.setIsInitial(true, position);
+        }else
+        {
+            mHeaderView.setIsInitial(false, position);
             mHeaderView.layout(0, mTop, r, mTop+mHeaderView.getMeasuredHeight());
         }
         mDescView.layout(0,mTop+mHeaderView.getMeasuredHeight(), r, b+mTop);
+        mHeaderView.setVideoClubSize(mDragOffset);
+    }
+
+
+    private int getStatusBarHeight() {
+            int result = 0;
+            int resourceId = getResources().getIdentifier("status_bar_height", "dimen", "android");
+            if (resourceId > 0) {
+                result = getResources().getDimensionPixelSize(resourceId);
+            }
+            return result;
     }
 
     private int getScreenHeight() {
-        return getContext().getResources().getDisplayMetrics().heightPixels;
+        return getContext().getResources().getDisplayMetrics().heightPixels - getStatusBarHeight();
     }
 
     private int getScreenWidth() {
@@ -280,7 +295,7 @@ public class YoutubeLayout extends ViewGroup implements
             postDelayed(new Runnable() {
                 @Override
                 public void run() {
-                    mHeaderView.setVideoClubSize();
+                    mHeaderView.setVideoClubSize(mDragOffset);
                     mHeaderView.setBackgroundResource(android.R.color.transparent);
                 }
             }, 300);
@@ -412,20 +427,24 @@ public class YoutubeLayout extends ViewGroup implements
         @Override
         public void onViewPositionChanged(View changedView, int left, int top, int dx, int dy) {
 
+            if (justStarted)
+            justStarted = false;
             mTop = top;
             mDragOffset = (float) top / dragRange;
             mHeaderView.setPivotY(mHeaderView.getHeight());
             mHeaderView.setScaleY((1 - 2*mDragOffset / 3));
             mDescView.setAlpha(1 - mDragOffset);
-            mHeaderView.setVideoClubSize();
+            mHeaderView.setVideoClubSize(mDragOffset);
             // 本布局最后的背景颜色
             // 1 :: 透明
             // 0 :: 黑色
             Drawable dr = new ColorDrawable(Color.BLACK);
             int alpha =  (int) ((1-mDragOffset)*255);
             dr.setAlpha(alpha < 0 ? 0 : alpha);
-            setBackground(dr);
+           // setBackground(dr);
             requestLayout();
+
+            Log.d("xxx", "dragoffset = "+mDragOffset);
         }
 
 
@@ -501,6 +520,7 @@ public class YoutubeLayout extends ViewGroup implements
         }
         return myDragerHelper.shouldInterceptTouchEvent(ev) || interceptTap;
     }
+
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {

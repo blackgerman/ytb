@@ -48,6 +48,15 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"/>
     </android.support.design.widget.CoordinatorLayout>
+
+    <fragment
+        android:id="@+id/player_fragment"
+        android:tag="PlayerFragment"
+        class="abiguime.tz.com.tzyoutube.main.fragment_player.PlayerFragment"
+        android:name="abiguime.tz.com.tzyoutube.main.fragment_player.PlayerFragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+
   <!--  <abiguime.tz.com.tzyoutube._commons.customviews.YoutubeLayout2
         android:layout_width="match_parent"
         android:orientation="vertical"

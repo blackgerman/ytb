@@ -45,6 +45,8 @@ public class MyRelativeLayout extends LinearLayout {
     private ImageView play_pause_view;
 
     private CustomSeekbar myseekbar;
+    private boolean isInitial = true;
+    private YoutubeLayout.SizeState position;
 
 
     public MyRelativeLayout(Context context) {
@@ -85,13 +87,11 @@ public class MyRelativeLayout extends LinearLayout {
             那么这些视图就不改自己的大小。
           2 - 所以需要手动去设置视图的大小
         * */
-        if (hasFinishInflate)
-            setVideoClubSize ();
     }
 
 
 
-    public void setVideoClubSize () {
+    public void setVideoClubSize (float dragOffset) {
         if (getHeight() == 0 || getWidth() == 0)
             return;
         MyRelativeLayout.LayoutParams layoutParams = (LayoutParams) frame_playback.getLayoutParams();
@@ -99,10 +99,17 @@ public class MyRelativeLayout extends LinearLayout {
         layoutParams.width = getWidth();
         //添加margin
         layoutParams.rightMargin = (int) (getContext().getResources().getDimensionPixelSize(R.dimen.item_margin_bottom)
-                * (1-getScaleY())); // 1
+                *  (isInitial&&position== YoutubeLayout.SizeState.Minimized ? 2f/3f : 1 - getScaleY())); // 1
+//
+        Log.d("xxx", "isinitial "+isInitial +" -- dragoffset = "+dragOffset +" getheight "+getHeight()+" -- getscale "+getScaleY());
+        if (isInitial && position == YoutubeLayout.SizeState.Minimized) {
+            setPivotY(getHeight());
+            setScaleY(1f/3);
+        }
         frame_playback.setLayoutParams(layoutParams);
         frame_playback.setScaleX(getScaleY());
         frame_playback.setPivotX(getWidth());
+        requestLayout();
     }
 
 
@@ -174,7 +181,7 @@ public class MyRelativeLayout extends LinearLayout {
 
     // 设置进度条缓存进度
     public void setBufferUpdatePercent(int percent) {
-    myseekbar.setSecondaryProgress(percent);
+        myseekbar.setSecondaryProgress(percent);
     /*myseekbar.setOnDragListener(new OnDragListener() {
         @Override
         public boolean onDrag(View v, DragEvent event) {
@@ -184,4 +191,8 @@ public class MyRelativeLayout extends LinearLayout {
     }
 
 
+    public void setIsInitial(boolean b, YoutubeLayout.SizeState position) {
+        this.isInitial = b;
+        this.position = position;
+    }
 }
